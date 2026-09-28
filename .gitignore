@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+dist/
+
+# Game and BepInEx assemblies. Never commit: these are Iron Gate's and BepInEx's,
+# not ours to redistribute. Supply them via VALHEIM_INSTALL or a local lib/.
+lib/
+
+# Decompiled game source, if kept locally
+decomp/
+
+# IDE / OS
+*.user
+.vs/
+.idea/
+*.zip
+
+# Local agent/editor settings
+.claude/
+
+# Generated at publish time from thunderstore/manifest.json
+thunderstore.toml
+
+# Probe screenshots from build/shot.sh; only cropped release shots are committed
+docs/images/probe*.png
+
+# Rig-specific dev loop (deploy to the gaming rig, read its log, screenshots): kept local
+build/deploy.sh
+build/logs.sh
+build/shot.sh
+build/crop.sh
