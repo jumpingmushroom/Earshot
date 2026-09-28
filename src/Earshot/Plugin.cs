@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
+using Earshot.Core;
 using HarmonyLib;
 
 namespace Earshot
@@ -27,9 +28,25 @@ namespace Earshot
         private void Awake()
         {
             Log = Logger;
+            PluginConfig.Bind(Config);
+            EarshotConsole.Register();
+
             _harmony = new Harmony(PluginGuid);
             _harmony.PatchAll(typeof(EarshotPlugin).Assembly);
+
             Logger.LogInfo(PluginName + " " + PluginVersion + " loaded.");
+        }
+
+        private void Update()
+        {
+            try
+            {
+                Runtime.Tick();
+            }
+            catch (Exception e)
+            {
+                WarnOnce("Runtime.Tick", e);
+            }
         }
 
         private void OnDestroy()
