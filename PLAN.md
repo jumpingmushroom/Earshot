@@ -162,7 +162,7 @@ during about 17 minutes of play: base, forest, a fight, doors, a cart. The resul
 
 ```
 ZSFX.Play postfix ─┐
-CreatureLoopScan ──┼─> SoundEvent ─> Filter ─> LabelResolver ─> CaptionBoard ─> CaptionHud
+LoopTracker ──────┼─> SoundEvent ─> Filter ─> LabelResolver ─> CaptionBoard ─> CaptionHud
 RaidWatch ─────────┘   (plain data)  (audible?  (text + category)  (merge, rank,   (draw, arrows,
                                       self?)                         linger)         fade)
 ```
@@ -171,7 +171,7 @@ Everything from `SoundEvent` up to `CaptionBoard` is pure C#, with no Unity or g
 (§3), so it can be unit-tested. Adapters on the game side turn Unity objects into `SoundEvent`s,
 and the HUD reads the board's snapshot each frame.
 
-### 2.2 Capture and filter (`Game/SoundCapture.cs`, `Core/Model/Audibility.cs`)
+### 2.2 Capture and filter (`Core/SoundCapture.cs`, `Core/Model/Audibility.cs`)
 
 For each `ZSFX.Play`:
 
@@ -323,14 +323,14 @@ to `MaxLines` lines.
 
 ### 2.5 Special sources
 
-- **Creature loops (`Game/CreatureLoopScan.cs`):** every 0.25 s, walk `Character.s_characters`
+- **Creature loops (`Core/LoopTracker.cs`):** every 0.25 s, walk `Character.s_characters`
   within 60 m of the listener. For each, check a small table of prefab name → (label, looping
   `AudioSource` path), for example `Deathsquito` → "Deathsquito buzzing". If that `AudioSource`
   is playing and passes the audibility check, refresh the line.
 - **Loops through ZSFX (fire, shield generator, stations):** `ZSFX.Play` gives the first frame
   only. The board keeps a weak list of looping `ZSFX` it has seen, re-checked every 0.25 s: still
   active, still `IsPlaying()`, still audible → refresh. Destroyed or silent → let it linger out.
-- **Raids (`Game/RaidWatch.cs`):** every 0.5 s, if `RandEventSystem.instance.GetActiveEvent()`
+- **Raids (`Core/RaidWatch.cs`):** every 0.5 s, if `RandEventSystem.instance.GetActiveEvent()`
   is non-null, keep a `Raid` line: "⚠ Raid" plus an arrow toward `m_pos`. It's only the word
   "Raid", because vanilla already shows the event's own message (`m_startMessage`) in the centre
   of the screen. The line is refreshed while the event is active, so it never fades mid-raid.
@@ -364,7 +364,7 @@ to `MaxLines` lines.
   loading screen. Not hidden in the inventory: sound still matters there.
 - **Scale** follows the game's GUI scale times Earshot's `Scale`.
 
-### 2.7 Vanilla integration (`Game/VanillaCaptions.cs`)
+### 2.7 Vanilla integration (`Core/VanillaCaptions.cs`)
 
 - **Toggle:** after `AccessibilitySettings.Initialize()` (AccessibilitySettings.cs:56),
   activate the `ClosedCaptions` toggle (`m_closedCaptionsToggle.gameObject.SetActive(true)`). Its
@@ -421,7 +421,8 @@ Earshot/
     Plugin.cs, PluginConfig.cs, ConfigurationManagerAttributes.cs
     Core/Model/     SoundEvent, Audibility, LabelTable, LabelResolver, CaptionBoard,
                     Bearing, Translations, TextCheck         (no UnityEngine, no game types)
-    Game/           SoundCapture, CreatureLoopScan, RaidWatch, VanillaCaptions, EarshotConsole
+    Core/           Runtime, SoundCapture, WorldQuery, LoopTracker, RaidWatch, VanillaCaptions,
+                    EarshotConsole   (not "Game/": an Earshot.Game namespace would shadow Valheim's Game class)
     Patches/        ZsfxPatch, AccessibilitySettingsPatch
     UI/             CaptionHud, CaptionLine, Sprites
     data/labels.tsv, translations/English.txt                 (embedded resources)
