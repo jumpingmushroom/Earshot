@@ -34,6 +34,7 @@ namespace Earshot.Core
             {
                 LoopTracker.Tick(now);
                 RaidWatch.Tick(now);
+                VanillaCaptions.Tick(now);
             }
             Board.Tick(now);
             CaptionHud.Ensure();
