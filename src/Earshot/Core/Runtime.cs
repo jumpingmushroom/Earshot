@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using BepInEx;
 using Earshot.Core.Model;
+using Earshot.UI;
 using UnityEngine;
 
 namespace Earshot.Core
@@ -29,6 +30,7 @@ namespace Earshot.Core
                 return;
             }
             Board.Tick(Time.time);
+            CaptionHud.Ensure();
         }
 
         /// <summary>Waits for the game's Localization, since both the language and the creature names come from it.</summary>
