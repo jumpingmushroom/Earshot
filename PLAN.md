@@ -185,7 +185,7 @@ For each `ZSFX.Play`:
    - Custom: evaluate `GetCustomCurve(AudioSourceCurveType.CustomRolloff)` at `d / max`.
 
    Multiply by the source's base volume. Drop the sound if the result is below
-   `MinimumVolume` (default 0.1: vanilla's own `m_minimumCaptionVolume` of 0.3 proved far too strict with the game's logarithmic rolloff, about 17 m for a Greydwarf alert). **The player's own
+   `MinimumVolume` (default 0.05: vanilla's own `m_minimumCaptionVolume` of 0.3 proved far too strict with the game's logarithmic rolloff, about 17 m for a Greydwarf alert, and 0.1 still cut a wolf howl off at 24 m). **The player's own
    volume sliders are deliberately ignored.** A deaf player may have sound at 0, and captions
    must still work.
 3. **Whose sound is it:** find the nearest `Character` within 2 m of the sound, players
@@ -302,7 +302,8 @@ to `MaxLines` lines.
   0.5 s. Loops refresh their line on every scan while they're still audible (§2.5).
 - **Throttle:** an `idle` sound can't **create** a line if the same group was captioned less than
   `IdleCooldown` seconds ago (default 20). It can still refresh a line that's visible. This
-  handles Neck ×480 and similar.
+  handles Neck ×480 and similar. Only sounds whose prefab name contains `_idle` (or table rows
+  flagged `idle`) count as idle; Iron Gate types wildlife attacks and deaths as Wildlife too.
 - **Rank:**
   - Category priority first: boss 6, raid 5, enemy 4, wildlife 3, world 2, ambient 1.
   - Then *not on screen* above *on screen*.
@@ -383,7 +384,7 @@ to `MaxLines` lines.
 | Section | Setting | Default | Meaning |
 | --- | --- | --- | --- |
 | General | Enabled | `true` | Master switch. Mirrors the Settings → Accessibility toggle. |
-| General | MinimumVolume | `0.1` | How loud a sound must be at your position to caption it (0 to 1, ignores your volume sliders). |
+| General | MinimumVolume | `0.05` | How loud a sound must be at your position to caption it (0 to 1, ignores your volume sliders). |
 | Categories | Boss / Raid / Enemy / Wildlife / World | `true` | Caption this category. |
 | Categories | Ambient | `false` | Fires, torches, other constant background. |
 | Display | MaxLines | `5` | Lines shown at once. |
@@ -480,6 +481,6 @@ No AI attribution in commits, PRs, the README or release notes.
   server, via `RPC_SetEvent`, and that `m_pos` is correct there.
 - **Placement:** the bottom-centre list against ship controls and the Eitr bar. It may need to
   shift up while sailing.
-- **`MinimumVolume` calibration:** Resolved 2026-09-28 on the rig: logarithmic rolloff confirmed (Deer 46 m = 0.09); default lowered to 0.1.
+- **`MinimumVolume` calibration:** Resolved 2026-09-28 on the rig: logarithmic rolloff confirmed (Deer 46 m = 0.09); default lowered to 0.05.
 - **Performance** of the `ZSFX.Play` postfix and the 0.25 s scans in a busy base and during a raid.
   The target is well under 0.1 ms per frame on average.

@@ -83,21 +83,28 @@ namespace Earshot.Core
         /// a nearby Player does NOT mean "self" — a loop can start while the player stands beside it
         /// (a fire, a shield generator), and dropping it here would lose it for good since it never
         /// gets a second chance via ZSFX.Play. So for loops that check is skipped and a nearby Player
-        /// falls through to the remaining checks as if no character were nearby. With no one nearby
-        /// (or a loop beside a Player), the creator, a Player parent, or any player within 2.5 m
-        /// (not for loops, which may have started while someone stood next to them) makes it "self".
+        /// falls through to the remaining checks as if no character were nearby. A sound naming a
+        /// creature (a "$enemy_" primary token) is never "self" either: ZSFX plays one frame after it
+        /// is spawned, and a dying creature has usually left Character.GetAllCharacters() by then, so
+        /// the nearest character within 2 m would otherwise be the player standing over it. With no
+        /// one nearby (or a loop beside a Player), the creator, a Player parent, or any player within
+        /// 2.5 m (not for loops, which may have started while someone stood next to them) makes it "self".
         /// </summary>
         private static bool IsSelf(ZSFX z, SoundEvent e, Vector3 pos)
         {
+            bool namesCreature = e.PrimaryToken.StartsWith("$enemy_", StringComparison.Ordinal);
+
             Character nearest = WorldQuery.NearestCharacter(pos, 2f);
-            if (nearest is Player && !e.IsLoop)
-                return true;
             if (nearest != null && !(nearest is Player))
             {
                 e.CreatureToken = nearest.m_name;
                 e.SourceId = nearest.GetInstanceID();
                 return false;
             }
+            if (namesCreature)
+                return false;
+            if (nearest is Player && !e.IsLoop)
+                return true;
 
             Player me = Player.m_localPlayer;
             if (z.m_sfxCreator != ZDOID.None && z.m_sfxCreator == me.GetZDOID())

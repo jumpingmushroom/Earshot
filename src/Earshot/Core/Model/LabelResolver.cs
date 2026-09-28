@@ -62,7 +62,7 @@ namespace Earshot.Core.Model
             }
             string action = GameText(e.SecondaryToken);
             Category category = Categories.FromVanilla(e.VanillaType);
-            bool idle = e.VanillaType == VanillaType.Wildlife;
+            bool idle = IsVanillaIdle(e);
 
             string creature = GameText(e.CreatureToken);
             if (creature != null)
@@ -95,10 +95,20 @@ namespace Earshot.Core.Model
                 Source = source,
                 Action = ActionText(row.Action, e),
                 Category = row.HasCategory ? row.Category : Categories.FromVanilla(e.VanillaType),
-                Idle = row.Idle || (!row.HasCategory && e.VanillaType == VanillaType.Wildlife),
+                Idle = row.Idle || (!row.HasCategory && IsVanillaIdle(e)),
                 Near = row.Near,
                 Origin = LabelOrigin.Table
             };
+        }
+
+        /// <summary>A vanilla-derived label is Idle only when it's Wildlife-typed AND its prefab name
+        /// contains "_idle" (case-insensitive); Iron Gate also types wildlife attacks and deaths as
+        /// Wildlife, and those must not be throttled as idle chatter.</summary>
+        private static bool IsVanillaIdle(SoundEvent e)
+        {
+            return e.VanillaType == VanillaType.Wildlife
+                && e.PrefabName != null
+                && e.PrefabName.IndexOf("_idle", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private string SourceText(string spec, SoundEvent e)

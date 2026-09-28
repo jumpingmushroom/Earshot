@@ -201,8 +201,30 @@ sfx_bad_source       Enemy     $enemy_nosuch   stomping
     public void VanillaWildlifeIsIdle()
     {
         SkipReason skip;
-        Label l = Resolve(new SoundEvent { PrefabName = "sfx_x", PrimaryToken = "$enemy_greydwarf", VanillaType = VanillaType.Wildlife }, out skip);
+        Label l = Resolve(new SoundEvent { PrefabName = "sfx_deer_idle", PrimaryToken = "$enemy_greydwarf", VanillaType = VanillaType.Wildlife }, out skip);
         Assert.True(l.Idle);
         Assert.Equal(Category.Wildlife, l.Category);
+    }
+
+    [Fact]
+    public void VanillaWildlifeAttackIsNotIdle()
+    {
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent { PrefabName = "sfx_boar_attack", PrimaryToken = "$enemy_troll", VanillaType = VanillaType.Wildlife }, out skip);
+        Assert.False(l.Idle);
+        Assert.Equal(Category.Wildlife, l.Category);
+    }
+
+    [Fact]
+    public void CreatureWildlifeAttackIsNotIdle()
+    {
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent
+        {
+            PrefabName = "sfx_boar_attack", PrimaryToken = "$enemy_troll", VanillaType = VanillaType.Wildlife,
+            CreatureToken = "$enemy_greydwarf"
+        }, out skip);
+        Assert.False(l.Idle);
+        Assert.Equal(LabelOrigin.Creature, l.Origin);
     }
 }
