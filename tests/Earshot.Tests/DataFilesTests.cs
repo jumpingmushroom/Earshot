@@ -41,7 +41,7 @@ public class DataFilesTests
             if (row.Action != null && row.Action != "@vanilla")
                 Assert.True(en.Get(row.Action) != null, row.Pattern + ": no English for action " + row.Action);
         }
-        foreach (string key in new[] { "format", "near", "raid", "settings_toggle" })
+        foreach (string key in new[] { "format", "near", "raid", "settings_toggle", "settings_toggle_descr" })
             Assert.True(en.Get(key) != null, "no English for " + key);
     }
 }

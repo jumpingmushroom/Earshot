@@ -8,6 +8,7 @@ format = {source} {action}
 near = near
 raid = Raid
 settings_toggle = Closed captions (Earshot)
+settings_toggle_descr = Show a caption for important sounds, with an arrow pointing where each one came from. More options in the mod settings (F1).
 
 # Sources
 earshot_fire = Fire
