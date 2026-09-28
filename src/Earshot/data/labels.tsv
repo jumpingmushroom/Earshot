@@ -24,6 +24,8 @@ sfx_fader_bell                    Boss      $enemy_fader            ringing
 sfx_greydwarf_idle                Wildlife  @creature               growling       idle
 # Attached to the Boar's walking footstep, labelled as a dying seal.
 sfx_seal_crawl                    -         -                       -              mute
+# The game's generic random ambience (birds, wind gusts): no identifiable source.
+RandomAmbientBase                 -         -                       -              mute
 
 # --- World: things that need attention ---
 sfx_smelter_produce               World     $piece_smelter          done

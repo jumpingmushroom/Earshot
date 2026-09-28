@@ -46,8 +46,8 @@ namespace Earshot
         {
             Enabled = cfg.Bind("General", "Enabled", true,
                 new ConfigDescription("Master switch. The same switch as 'Closed captions' in Settings > Accessibility.", null, Attr(100)));
-            MinimumVolume = cfg.Bind("General", "MinimumVolume", 0.3f,
-                new ConfigDescription("How loud a sound must be where you stand to get a caption (0 to 1). Ignores your volume sliders, so captions work with sound off.",
+            MinimumVolume = cfg.Bind("General", "MinimumVolume", 0.1f,
+                new ConfigDescription("How loud a sound must be where you stand to get a caption (0 to 1). 0.1 is about half a sound's range. Ignores your volume sliders, so captions work with sound off.",
                     new AcceptableValueRange<float>(0f, 1f), Attr(90)));
 
             BindCategory(cfg, Category.Boss, true, "Bosses: their alerts, attacks and summons.", 80);

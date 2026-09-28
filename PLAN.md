@@ -185,7 +185,7 @@ For each `ZSFX.Play`:
    - Custom: evaluate `GetCustomCurve(AudioSourceCurveType.CustomRolloff)` at `d / max`.
 
    Multiply by the source's base volume. Drop the sound if the result is below
-   `MinimumVolume` (default 0.3, from vanilla's `m_minimumCaptionVolume`). **The player's own
+   `MinimumVolume` (default 0.1: vanilla's own `m_minimumCaptionVolume` of 0.3 proved far too strict with the game's logarithmic rolloff, about 17 m for a Greydwarf alert). **The player's own
    volume sliders are deliberately ignored.** A deaf player may have sound at 0, and captions
    must still work.
 3. **Whose sound is it:** find the nearest `Character` within 2 m of the sound, players
@@ -383,7 +383,7 @@ to `MaxLines` lines.
 | Section | Setting | Default | Meaning |
 | --- | --- | --- | --- |
 | General | Enabled | `true` | Master switch. Mirrors the Settings → Accessibility toggle. |
-| General | MinimumVolume | `0.3` | How loud a sound must be at your position to caption it (0 to 1, ignores your volume sliders). |
+| General | MinimumVolume | `0.1` | How loud a sound must be at your position to caption it (0 to 1, ignores your volume sliders). |
 | Categories | Boss / Raid / Enemy / Wildlife / World | `true` | Caption this category. |
 | Categories | Ambient | `false` | Fires, torches, other constant background. |
 | Display | MaxLines | `5` | Lines shown at once. |
@@ -480,8 +480,6 @@ No AI attribution in commits, PRs, the README or release notes.
   server, via `RPC_SetEvent`, and that `m_pos` is correct there.
 - **Placement:** the bottom-centre list against ship controls and the Eitr bar. It may need to
   shift up while sailing.
-- **`MinimumVolume` calibration:** if the game's sounds use logarithmic rolloff, 0.3 is strict.
-  A Greydwarf alert with `minDistance` 5 would fall below it at about 17 m. The `earshot`
-  console output shows loudness and distance, so the default gets tuned at build step 2.
+- **`MinimumVolume` calibration:** Resolved 2026-09-28 on the rig: logarithmic rolloff confirmed (Deer 46 m = 0.09); default lowered to 0.1.
 - **Performance** of the `ZSFX.Play` postfix and the 0.25 s scans in a busy base and during a raid.
   The target is well under 0.1 ms per frame on average.

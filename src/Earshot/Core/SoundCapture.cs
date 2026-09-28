@@ -38,6 +38,8 @@ namespace Earshot.Core
                 Loudness = WorldQuery.Loudness(a, z.m_vol, distance)
             };
 
+            if (!e.IsLoop && e.Loudness == 0)
+                return;
             if (!e.IsLoop && e.Loudness < PluginConfig.MinimumVolume.Value)
             {
                 Runtime.Record(e, "quiet", null);
@@ -59,6 +61,8 @@ namespace Earshot.Core
             }
             if (e.IsLoop && LoopSeen != null)
                 LoopSeen(z, e, label);
+            if (e.Loudness == 0)
+                return;
             if (e.Loudness < PluginConfig.MinimumVolume.Value)
             {
                 Runtime.Record(e, "quiet", label);

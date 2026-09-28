@@ -11,7 +11,7 @@ namespace Earshot.Core
                 delegate (Terminal.ConsoleEventArgs args)
                 {
                     string sub = args.Length > 1 ? args[1].ToLowerInvariant() : "";
-                    if (sub == "unlabelled")
+                    if (sub == "unlabelled" || sub == "unlabeled")
                         Unlabelled(args.Context);
                     else
                         Recent(args.Context);
