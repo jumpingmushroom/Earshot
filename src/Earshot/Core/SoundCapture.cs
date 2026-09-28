@@ -75,16 +75,20 @@ namespace Earshot.Core
 
         /// <summary>
         /// Fills CreatureToken/ObjectToken/SourceId and decides whether this is a player's own sound.
-        /// Nearest character within 2 m: a player means "self", a creature owns the sound. With no one
-        /// nearby, the creator, a Player parent, or any player within 2.5 m (not for loops, which may
-        /// have started while someone stood next to them) makes it "self".
+        /// Nearest character within 2 m: a player means "self", a creature owns the sound. For a loop,
+        /// a nearby Player does NOT mean "self" — a loop can start while the player stands beside it
+        /// (a fire, a shield generator), and dropping it here would lose it for good since it never
+        /// gets a second chance via ZSFX.Play. So for loops that check is skipped and a nearby Player
+        /// falls through to the remaining checks as if no character were nearby. With no one nearby
+        /// (or a loop beside a Player), the creator, a Player parent, or any player within 2.5 m
+        /// (not for loops, which may have started while someone stood next to them) makes it "self".
         /// </summary>
         private static bool IsSelf(ZSFX z, SoundEvent e, Vector3 pos)
         {
             Character nearest = WorldQuery.NearestCharacter(pos, 2f);
-            if (nearest is Player)
+            if (nearest is Player && !e.IsLoop)
                 return true;
-            if (nearest != null)
+            if (nearest != null && !(nearest is Player))
             {
                 e.CreatureToken = nearest.m_name;
                 e.SourceId = nearest.GetInstanceID();

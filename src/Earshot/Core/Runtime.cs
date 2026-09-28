@@ -29,7 +29,13 @@ namespace Earshot.Core
                 Board.Clear();
                 return;
             }
-            Board.Tick(Time.time);
+            float now = Time.time;
+            if (PluginConfig.Enabled.Value)
+            {
+                LoopTracker.Tick(now);
+                RaidWatch.Tick(now);
+            }
+            Board.Tick(now);
             CaptionHud.Ensure();
         }
 
@@ -47,6 +53,7 @@ namespace Earshot.Core
             Resolver = new LabelResolver(table, Tr, token => Localization.instance.Localize(token));
             EarshotPlugin.Log.LogInfo("Earshot ready: " + table.Count + " label rows, language " + language +
                 (File.Exists(custom) ? " (custom strings from " + custom + ")" : ""));
+            LoopTracker.Init();
         }
 
         private static string ReadResource(string name)
