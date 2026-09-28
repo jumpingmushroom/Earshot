@@ -1,1 +1,35 @@
+# Earshot's English strings: key = text.
+# To translate, copy this file to BepInEx/config/Earshot/translations/<Language>.txt, using the game's
+# language name (German.txt, Norwegian.txt, ...), and translate the right-hand side. Keys you leave out
+# fall back to English. "format" decides the word order: {source} is the creature or object, {action}
+# what it is doing. Creature and building names come from the game's own translations.
+
 format = {source} {action}
+near = near
+raid = Raid
+settings_toggle = Closed captions (Earshot)
+
+# Sources
+earshot_fire = Fire
+earshot_torch = Torch
+earshot_thunder = Distant thunder
+earshot_gate = Gate
+earshot_door = Door
+earshot_ship = Ship
+earshot_tree = Tree
+
+# Actions
+attacking = attacking
+breaking = breaking apart
+buzzing = buzzing
+charging = charging
+closing = closing
+crackling = crackling
+done = done
+falling = falling
+growling = growling
+lowfuel = low on fuel
+opening = opening
+ringing = ringing
+splashing = splashing
+stomping = stomping

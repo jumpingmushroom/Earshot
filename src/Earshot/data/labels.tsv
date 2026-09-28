@@ -1,1 +1,44 @@
-# filled in Task 7
+# Earshot label table. One row per sound prefab, or a prefix with a trailing *.
+# Columns (whitespace-separated, "-" = empty):
+#   prefab    category    source    action    flags
+# category: Boss Raid Enemy Wildlife World Ambient Self, or - to use the game's own caption type
+# source:   @creature (nearest creature's name), @object (parent piece's name),
+#           $game_token (localised by the game), $earshot_key or bare_key (translations/<Language>.txt)
+# action:   a key in translations/<Language>.txt, or @vanilla (the game's own action word)
+# flags:    idle (throttled chatter), mute (never caption), near (near tag even if not a threat)
+# Prefab names with a space are written with _ : "sfx_distant thunder" -> sfx_distant_thunder.
+# Creature loops (sounds attached to the creature itself) use creature:<prefab>.
+# Sounds with no row still get captioned from the game's own caption tokens when those are clean.
+
+# --- Enemies: sounds the game leaves uncaptioned ---
+sfx_troll_footstep                Enemy     $enemy_troll            stomping
+sfx_troll_footstep_water          Enemy     $enemy_troll            splashing
+sfx_lox_footstep_run              Enemy     $enemy_lox              charging
+sfx_serpent_attack_trigger        Enemy     $enemy_serpent          attacking
+sfx_deathsquito_attack            Enemy     $enemy_deathsquito      attacking
+creature:Deathsquito              Enemy     @creature               buzzing        near
+sfx_fader_bell                    Boss      $enemy_fader            ringing
+
+# --- Fixes for mislabelled game sounds ---
+# The game labels the plain Greydwarf idle "Greydwarf Brute growling".
+sfx_greydwarf_idle                Wildlife  @creature               growling       idle
+# Attached to the Boar's walking footstep, labelled as a dying seal.
+sfx_seal_crawl                    -         -                       -              mute
+
+# --- World: things that need attention ---
+sfx_smelter_produce               World     $piece_smelter          done
+sfx_kiln_produce                  World     $piece_charcoalkiln     done
+sfx_shieldgenerator_lowfuel_loop  World     $piece_shieldgenerator  lowfuel        near
+sfx_flametalgate_door_open        World     $earshot_gate           opening
+sfx_flametalgate_door_close       World     $earshot_gate           closing
+sfx_stonedoor_sliding_open        World     $earshot_door           opening
+sfx_metaldoor_sliding_open        World     $earshot_door           opening
+sfx_ship_destroyed                World     $earshot_ship           breaking
+sfx_tree_fall_hit                 World     $earshot_tree           falling
+
+# --- Ambient: off by default (constant background inside a base) ---
+sfx_fire_loop                     Ambient   $earshot_fire           crackling
+sfx_EternalPyre_Fire_Loop         Ambient   $earshot_fire           crackling
+sfx_morkhalla_torch_loop          Ambient   $earshot_torch          crackling
+sfx_skeleton_hildir_torch_loop    Ambient   $earshot_torch          crackling
+sfx_distant_thunder               Ambient   $earshot_thunder        -
