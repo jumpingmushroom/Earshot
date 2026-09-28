@@ -30,7 +30,7 @@ namespace Earshot.Core
                 return;
             }
             float now = Time.time;
-            if (PluginConfig.Enabled.Value)
+            if (PluginConfig.Enabled.Value && Ready)
             {
                 LoopTracker.Tick(now);
                 RaidWatch.Tick(now);
