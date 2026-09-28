@@ -68,7 +68,8 @@ Every one-shot and most looping sound effects are prefabs carrying a `ZSFX` comp
   (FootStep.cs:308, SE_Poison.cs:46, SE_Burning.cs:55).
 
 Earshot hooks `ZSFX.Play` with a Harmony postfix. The postfix reads the `AudioSource`
-(`loop`, `maxDistance`, `minDistance`, `rolloffMode`, `spatialBlend`) and the transform, then
+(`loop`, `maxDistance`, `minDistance`, `rolloffMode`, `spatialBlend`), `ZSFX.m_maxVol` as the base
+volume, and the transform, then
 hands a plain struct to the model. It must stay cheap: the probe logged about 480 Neck idles in
 17 minutes, and combat is far busier.
 
@@ -187,11 +188,16 @@ For each `ZSFX.Play`:
    `MinimumVolume` (default 0.3, from vanilla's `m_minimumCaptionVolume`). **The player's own
    volume sliders are deliberately ignored.** A deaf player may have sound at 0, and captions
    must still work.
-3. **Self:** drop the sound if it was created by the local player (`SetSoundEffectCreator` ==
-   local player's ZDOID), if its parent is the local player, or, for world sounds, if its source
-   is within 2.5 m of the local player. That last rule covers the door you just opened and
-   your own chopping. It's a heuristic to confirm on the rig (§5). Creature sounds that resolve
-   to a creature are never "self", even when close.
+3. **Whose sound is it:** find the nearest `Character` within 2 m of the sound, players
+   included.
+   - If it's a player, the sound is "self" and dropped. That covers your own, and other
+     players', hurt, swing and eat sounds.
+   - If it's a creature, the sound belongs to that creature and is never "self", even when
+     close.
+   - With no character nearby, a sound is also "self" if its creator (`m_sfxCreator`) is the
+     local player, if it's parented under a `Player`, or if **any** player is within 2.5 m.
+     That last rule covers the door you just opened, your chopping and building, and a
+     teammate's. It's a heuristic to confirm on the rig (§5).
 4. Build a `SoundEvent`:
 
    | Field | Meaning |
@@ -228,19 +234,33 @@ sfx_frozenking_*          Boss      @creature   @vanilla
 
 - `source`:
   - `@creature`: the nearest `Character` within 2 m of the sound, using its localised `m_name`.
-  - `@object`: the parent or the nearest piece, using its `Piece.m_name` or `Hoverable` text.
-  - `$token`: a game or Earshot token.
+  - `@object`: the `Piece` the sound is parented under, using its `Piece.m_name`. Station
+    sounds such as `sfx_smelter_produce` are spawned unparented, so their rows name the piece
+    with a literal token instead (`$piece_smelter`).
+  - `$token`: a game token (`$enemy_troll`, localised by the game). `$earshot_…` tokens and bare
+    words are looked up in Earshot's translation file.
 - `action`: a key in Earshot's translation file (`crackling`), or `@vanilla`, which uses the
   vanilla secondary token when it localises cleanly.
 - `flags`:
   - `idle`: wildlife-style chatter, throttled harder (§2.4).
   - `mute`: never caption this sound.
-  - `near`: the line always shows the `near` tag.
-- A trailing `*` in the prefab name matches by prefix, so one line covers a whole family.
+  - `near`: the line can show the `near` tag even though it isn't a threat, for example a
+    shield generator low on fuel. It still has to be within `NearDistance`.
+- A trailing `*` in the prefab name matches by prefix, so one line covers a whole family. The
+  longest matching prefix wins, and an exact name beats any prefix.
+- Fields are separated by whitespace, and `-` means empty. The few prefab names with a space in
+  them (`sfx_distant thunder`) are written with `_` in the table. Lookups treat a space and `_`
+  as the same.
+- Creature loops (§2.5) use rows named `creature:<prefab>`, for example `creature:Deathsquito`.
 
-**Resolution order** (agreed): (1) the table entry; (2) no entry, but a `Character` within 2 m
-→ its name plus the vanilla secondary token, if clean; (3) no creature → vanilla primary plus
-secondary tokens, if clean; (4) otherwise, **no caption**. With `LogUnlabelled` on, the sound is
+**Resolution order** (agreed):
+1. The table entry.
+2. No entry, but the sound has a vanilla caption token and a creature within 2 m: the creature's
+   name plus the vanilla secondary token, if clean. The vanilla token is what marks a sound as
+   caption-worthy, so untagged hit and footstep sounds don't turn into bare creature names.
+3. No creature: the vanilla primary token, plus the secondary token if it's clean. A clean
+   primary with a broken secondary shows the primary alone.
+4. Otherwise, **no caption**. With `LogUnlabelled` on, the sound is
 recorded for gap reports. With no table entry, the category comes from the vanilla type:
 Boss → Boss, Enemy → Enemy, Wildlife → Wildlife, but an enemy creature's idle stays Wildlife
 (throttled), and Default → World.
@@ -297,8 +317,8 @@ to `MaxLines` lines.
   recomputed every frame from the current camera, so the arrow turns as you turn. With
   `SnapArrows` on (the default), the arrow snaps to 8 directions. Off, it rotates smoothly.
 - **Distance:** line opacity is 1.0 when close, easing to `FarOpacity` (0.55) at the edge of the
-  sound's range. The `near` tag shows for threat categories within `NearDistance` (10 m), and
-  for rows flagged `near`.
+  sound's range. The `near` tag shows within `NearDistance` (10 m) for threat categories and for
+  rows flagged `near`.
 - **On screen:** those lines draw at `OnScreenOpacity` (0.5) and rank lowest within their category.
 
 ### 2.5 Special sources
@@ -311,9 +331,9 @@ to `MaxLines` lines.
   only. The board keeps a weak list of looping `ZSFX` it has seen, re-checked every 0.25 s: still
   active, still `IsPlaying()`, still audible → refresh. Destroyed or silent → let it linger out.
 - **Raids (`Game/RaidWatch.cs`):** every 0.5 s, if `RandEventSystem.instance.GetActiveEvent()`
-  is non-null, keep a `Raid` line: "⚠ Raid" plus an arrow toward `m_pos`. The text is
-  `m_startMessage` localised when it's clean and short, and otherwise just "Raid". It's
-  refreshed while the event is active, so it never fades mid-raid.
+  is non-null, keep a `Raid` line: "⚠ Raid" plus an arrow toward `m_pos`. It's only the word
+  "Raid", because vanilla already shows the event's own message (`m_startMessage`) in the centre
+  of the screen. The line is refreshed while the event is active, so it never fades mid-raid.
 - **Fires:** `sfx_fire_loop` and the hearth, brazier and torch loops are `Ambient`, which is
   **off by default**. Inside a base they're constant background, not a cue.
 
@@ -346,11 +366,12 @@ to `MaxLines` lines.
 
 ### 2.7 Vanilla integration (`Game/VanillaCaptions.cs`)
 
-- **Toggle:** when `AccessibilitySettings` loads, activate the `ClosedCaptions` toggle
-  (`m_closedCaptionsToggle.gameObject.SetActive(true)`). Its state is driven from and saved to
-  Earshot's `General.Enabled`, **not** from `PlatformPrefs("ClosedCaptions")`, because vanilla's
-  pref defaults to 0 and captions must be on by default. Patch `LoadSettings` / `OnOkAsync` to
-  read and write our config entry. `DirectionalIndicators` stays hidden. If the toggle's label
+- **Toggle:** after `AccessibilitySettings.Initialize()` (AccessibilitySettings.cs:56),
+  activate the `ClosedCaptions` toggle (`m_closedCaptionsToggle.gameObject.SetActive(true)`). Its
+  state is driven from and saved to Earshot's `General.Enabled`, **not** from
+  `PlatformPrefs("ClosedCaptions")`, because vanilla's pref defaults to 0 and captions must be on
+  by default. A postfix on `Initialize` sets the toggle, and a postfix on `OnOkAsync` writes it
+  back to our config entry. `DirectionalIndicators` stays hidden. If the toggle's label
   is missing or unlocalised, Earshot sets it to its own "Closed captions (Earshot)" string (§5).
 - **If vanilla captions go live:** if the vanilla `ClosedCaptions` object ever has active child
   lines, meaning Iron Gate filled in `RegisterCaption`, Earshot deactivates that object and logs
@@ -458,5 +479,8 @@ No AI attribution in commits, PRs, the README or release notes.
   server, via `RPC_SetEvent`, and that `m_pos` is correct there.
 - **Placement:** the bottom-centre list against ship controls and the Eitr bar. It may need to
   shift up while sailing.
+- **`MinimumVolume` calibration:** if the game's sounds use logarithmic rolloff, 0.3 is strict.
+  A Greydwarf alert with `minDistance` 5 would fall below it at about 17 m. The `earshot`
+  console output shows loudness and distance, so the default gets tuned at build step 2.
 - **Performance** of the `ZSFX.Play` postfix and the 0.25 s scans in a busy base and during a raid.
   The target is well under 0.1 ms per frame on average.
