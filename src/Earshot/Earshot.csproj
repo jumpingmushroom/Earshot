@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Earshot</AssemblyName>
+    <RootNamespace>Earshot</RootNamespace>
+    <Version>0.1.0</Version>
+    <Description>Closed captions for Valheim's important sounds, with a live direction arrow.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- .NET Framework 4.7.2 reference assemblies; required to build net472 off-Windows. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Publicized at build time only; the shipped DLL binds to the real members
+         and runs against an unmodified game install. -->
+    <Reference Include="assembly_valheim"  HintPath="$(ValheimManaged)/assembly_valheim.dll"  Publicize="true" Private="false" />
+    <Reference Include="assembly_utils"    HintPath="$(ValheimManaged)/assembly_utils.dll"    Private="false" />
+    <Reference Include="assembly_guiutils" HintPath="$(ValheimManaged)/assembly_guiutils.dll" Private="false" />
+
+    <Reference Include="UnityEngine"                     HintPath="$(ValheimManaged)/UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule"          HintPath="$(ValheimManaged)/UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.AudioModule"         HintPath="$(ValheimManaged)/UnityEngine.AudioModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UI"                  HintPath="$(ValheimManaged)/UnityEngine.UI.dll" Private="false" />
+    <Reference Include="UnityEngine.UIModule"            HintPath="$(ValheimManaged)/UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.TextRenderingModule" HintPath="$(ValheimManaged)/UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="UnityEngine.IMGUIModule"         HintPath="$(ValheimManaged)/UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.InputLegacyModule"   HintPath="$(ValheimManaged)/UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro"               HintPath="$(ValheimManaged)/Unity.TextMeshPro.dll" Private="false" />
+
+    <Reference Include="BepInEx"  HintPath="$(BepInExPath)/BepInEx.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="$(BepInExPath)/0Harmony.dll" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="data/labels.tsv" LogicalName="Earshot.labels.tsv" />
+    <EmbeddedResource Include="translations/English.txt" LogicalName="Earshot.English.txt" />
+  </ItemGroup>
+
+</Project>
