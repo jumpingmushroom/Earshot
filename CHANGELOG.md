@@ -10,8 +10,8 @@
   close threats, and dims with distance.
 - One line per kind of source with a `×N` count, priority by category when the list is full, idle
   chatter throttled, sounds you can see up close dimmed.
-- Looping sounds are captioned while you can hear them: a Deathsquito's buzz, and fires if you
-  turn on the Ambient category.
+- Looping sounds are captioned while you can hear them, such as fires when the Ambient category
+  is on. A Deathsquito's buzz is captioned the same way (not yet seen in play).
 - Audibility is measured from the sound itself at your position, not your volume sliders, with a
   default cutoff of 0.05 — captions work with the game's sound off.
 - Your own actions stay silent, including chests and doors you open (anything within the game's

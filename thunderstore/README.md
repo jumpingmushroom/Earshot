@@ -1,11 +1,11 @@
 # Earshot
 
 Closed captions for the Valheim sounds worth reacting to. A Greydwarf spotting you, a Troll
-stomping through the trees, a Deathsquito closing in, your smelter finishing: each gets a short
+stomping through the trees, a Boar charging at you, your smelter finishing: each gets a short
 caption at the bottom of the screen, with an arrow pointing where it came from. Made for deaf and
 hard-of-hearing players, and for anyone playing with the sound low.
 
-![Captions during a fight](https://raw.githubusercontent.com/jumpingmushroom/Earshot/v0.1.0/docs/images/captions.jpg)
+![Earshot's caption list](https://raw.githubusercontent.com/jumpingmushroom/Earshot/v0.1.0/docs/images/captions.jpg)
 
 *Sample captions from `earshot demo` in the Meadows: a boss, three Greydwarfs close by, a Troll to
 the right, a Deer behind, a smelter to the left.*
