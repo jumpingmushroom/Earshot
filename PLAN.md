@@ -350,7 +350,7 @@ to `MaxLines` lines.
 - **Each line:** `[⚠] [arrow] Text ×N  near`, in TextMeshPro using the game's own font, so it fits
   Valheim's look and supports the game's languages.
 - **The arrow and ⚠ are sprites generated in code**, not font glyphs. Valheim's fonts may lack
-  `↖` and `⚠`, and one sprite rotated in 45° steps renders the same everywhere.
+  `↖` and `⚠`, and one sprite rotated in 45° steps renders the same everywhere. The arrow has a shaft: a bare arrowhead proved ambiguous at diagonals at 20 px.
 - **Colours**, all editable in F1:
 
   | Category | Colour |

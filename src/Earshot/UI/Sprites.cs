@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Earshot.UI
 {
     /// <summary>
-    /// White sprites drawn in code and tinted per line: an up-pointing arrowhead (rotated for direction),
+    /// White sprites drawn in code and tinted per line: an up-pointing arrow with a shaft (rotated for direction),
     /// a warning triangle with a cut-out "!", and a rounded plate for 9-slicing. Drawn rather than taken
     /// from a font: Valheim's fonts may not have ↖ or ⚠.
     /// </summary>
@@ -14,10 +14,10 @@ namespace Earshot.UI
         private static Sprite _warning;
         private static Sprite _plate;
 
-        private static readonly Vector2[] ArrowShape = { new Vector2(16f, 30f), new Vector2(29f, 3f), new Vector2(16f, 10f), new Vector2(3f, 3f) };
+        private static readonly Vector2[] ArrowHead = { new Vector2(16f, 31f), new Vector2(28f, 17f), new Vector2(4f, 17f) };
         private static readonly Vector2[] TriangleShape = { new Vector2(16f, 30f), new Vector2(31f, 2f), new Vector2(1f, 2f) };
 
-        public static Sprite Arrow => _arrow ?? (_arrow = Make(32, (x, y) => Inside(x, y, ArrowShape), Vector4.zero));
+        public static Sprite Arrow => _arrow ?? (_arrow = Make(32, ArrowPixel, Vector4.zero));
         public static Sprite Warning => _warning ?? (_warning = Make(32, WarningPixel, Vector4.zero));
         public static Sprite Plate => _plate ?? (_plate = Make(32, PlatePixel, new Vector4(12f, 12f, 12f, 12f)));
 
@@ -28,6 +28,15 @@ namespace Earshot.UI
             bool bar = x >= 14.5f && x <= 17.5f && y >= 12f && y <= 23f;
             bool dot = x >= 14.5f && x <= 17.5f && y >= 6f && y <= 9f;
             return !(bar || dot);
+        }
+
+        private static bool ArrowPixel(float x, float y)
+        {
+            // Head triangle
+            if (Inside(x, y, ArrowHead))
+                return true;
+            // Shaft: x ∈ [12.5, 19.5], y ∈ [2, 18]
+            return x >= 12.5f && x <= 19.5f && y >= 2f && y <= 18f;
         }
 
         private static bool PlatePixel(float x, float y)
