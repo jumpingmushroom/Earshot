@@ -212,6 +212,8 @@ For each `ZSFX.Play`:
    | `sourceId` | Instance id of the resolved creature or object, used for ×N and loop tracking |
    | `sourceName` | Name of that creature or object, if any |
    | `onScreen` | Viewport test: z > 0 and inside the viewport, within 15 m |
+5. **Settling:** World-category sounds are skipped while the local player is teleporting and for 5 s
+   after arriving or spawning: doors replay their opening sound when they load (Door.cs:47-71).
 
 ### 2.3 Labels and categories (`Core/Model/LabelResolver.cs`, `data/labels.tsv`)
 
@@ -408,6 +410,8 @@ to `MaxLines` lines.
   (`quiet`, `self`, `unlabelled`, `category off`, `throttled`).
 - `earshot unlabelled`: every distinct unlabelled audible sound this session, to paste into a
   gap report.
+- `earshot demo`: sample captions (boss, enemies ×3, wildlife, world) around you for 20 s, for
+  screenshots and to preview colour/size settings.
 
 ---
 

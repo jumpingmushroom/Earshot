@@ -2,17 +2,20 @@ using Earshot.Core.Model;
 
 namespace Earshot.Core
 {
-    /// <summary>"earshot" prints the last 20 decisions; "earshot unlabelled" every unlabelled prefab this session. Mirrored to the BepInEx log.</summary>
+    /// <summary>"earshot" prints the last 20 decisions; "earshot unlabelled" every unlabelled prefab this session;
+    /// "earshot demo" shows sample captions for screenshots. Mirrored to the BepInEx log.</summary>
     internal static class EarshotConsole
     {
         public static void Register()
         {
-            new Terminal.ConsoleCommand("earshot", "Earshot: recent sounds and their captions (unlabelled: list sounds with no caption)",
+            new Terminal.ConsoleCommand("earshot", "Earshot: recent sounds and their captions (unlabelled: sounds with no caption; demo: sample captions for 20 s)",
                 delegate (Terminal.ConsoleEventArgs args)
                 {
                     string sub = args.Length > 1 ? args[1].ToLowerInvariant() : "";
                     if (sub == "unlabelled" || sub == "unlabeled")
                         Unlabelled(args.Context);
+                    else if (sub == "demo")
+                        Demo(args.Context);
                     else
                         Recent(args.Context);
                 });
@@ -39,6 +42,12 @@ namespace Earshot.Core
             Say(ctx, "Earshot: " + list.Count + " audible sounds with no caption this session:");
             foreach (string p in list)
                 Say(ctx, "  " + p);
+        }
+
+        private static void Demo(Terminal ctx)
+        {
+            DemoCaptions.Start(20f);
+            Say(ctx, "Earshot: showing sample captions for 20 seconds.");
         }
     }
 }

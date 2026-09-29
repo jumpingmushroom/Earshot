@@ -16,7 +16,18 @@ namespace Earshot.Core
         public static LabelResolver Resolver;
         public static Translations Tr = new Translations();
 
+        /// <summary>Doors compare their freshly-loaded ZDO state against their still-closed animator on
+        /// their first UpdateState and replay m_openEffects (decomp Door.cs:47-71), captioning "Door opening"
+        /// for doors nobody used. World-category sounds are suppressed while teleporting and for this long
+        /// after arriving or spawning, to ride out that load-sync window.</summary>
+        private const float SettleSeconds = 5f;
+
+        public static float SettleUntil;
+        private static Player _lastPlayer;
+
         public static bool Ready => Resolver != null;
+
+        public static bool Settling => Time.time < SettleUntil;
 
         public static void Tick()
         {
@@ -29,12 +40,22 @@ namespace Earshot.Core
                 Board.Clear();
                 return;
             }
+            Player me = Player.m_localPlayer;
+            if (me != _lastPlayer)
+            {
+                _lastPlayer = me;
+                SettleUntil = Time.time + SettleSeconds;
+            }
+            if (me.IsTeleporting())
+                SettleUntil = Time.time + SettleSeconds;
+
             float now = Time.time;
             if (PluginConfig.Enabled.Value && Ready)
             {
                 LoopTracker.Tick(now);
                 RaidWatch.Tick(now);
                 VanillaCaptions.Tick(now);
+                DemoCaptions.Tick(now);
             }
             Board.Tick(now);
             CaptionHud.Ensure();

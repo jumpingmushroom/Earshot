@@ -72,6 +72,11 @@ namespace Earshot.Core
                 Runtime.Record(e, "quiet", label);
                 return;
             }
+            if (label.Category == Category.World && Runtime.Settling)
+            {
+                Runtime.Record(e, "settling", label);
+                return;
+            }
             if (!PluginConfig.CategoryOn(label.Category))
             {
                 Runtime.Record(e, "category off", label);
