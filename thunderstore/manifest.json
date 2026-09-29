@@ -5,5 +5,5 @@
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2350"
   ],
-  "description": "Closed captions for Valheim's important sounds: enemies, raids, bosses, fires and more, each with a live direction arrow. For deaf and hard-of-hearing players, or anyone playing quietly. Client-side."
+  "description": "Closed captions for Valheim's important sounds: enemies, raids, bosses, smelters and more, each with a live direction arrow. For deaf and hard-of-hearing players, or anyone playing quietly. Client-side."
 }

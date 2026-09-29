@@ -68,10 +68,11 @@ Every one-shot and most looping sound effects are prefabs carrying a `ZSFX` comp
   (FootStep.cs:308, SE_Poison.cs:46, SE_Burning.cs:55).
 
 Earshot hooks `ZSFX.Play` with a Harmony postfix. The postfix reads the `AudioSource`
-(`loop`, `maxDistance`, `minDistance`, `rolloffMode`, `spatialBlend`), `ZSFX.m_maxVol` as the base
-volume, and the transform, then
+(`loop`, `maxDistance`, `minDistance`, `rolloffMode`, `spatialBlend`), `ZSFX.m_vol` (the per-play
+randomised volume, ZSFX.cs:314) as the base volume, and the transform, then
 hands a plain struct to the model. It must stay cheap: the probe logged about 480 Neck idles in
-17 minutes, and combat is far busier.
+17 minutes, and combat is far busier. Loop re-checks (§2.5) use the `AudioSource.volume` instead,
+which already reflects the game's concurrency muting and fades.
 
 ### 1.2 Iron Gate's unfinished caption system
 
@@ -189,15 +190,21 @@ For each `ZSFX.Play`:
    volume sliders are deliberately ignored.** A deaf player may have sound at 0, and captions
    must still work.
 3. **Whose sound is it:** find the nearest `Character` within 2 m of the sound, players
-   included.
-   - If it's a player, the sound is "self" and dropped. That covers your own, and other
-     players', hurt, swing and eat sounds.
+   included. The rules, in order:
    - If it's a creature, the sound belongs to that creature and is never "self", even when
      close.
-   - With no character nearby, a sound is also "self" if its creator (`m_sfxCreator`) is the
-     local player, if it's parented under a `Player`, or if **any** player is within 5 m, the
-     game's interaction range. That last rule covers the door you just opened, your chopping
-     and building, and a teammate's. It's a heuristic to confirm on the rig (§5).
+   - A sound naming a creature (a `$enemy_` primary token) is never "self": a dying creature has
+     usually left `Character.GetAllCharacters()` by the time its sound plays.
+   - A sound with a creator (`m_sfxCreator`, set by footsteps, poison and burning) is "self"
+     only if that ZDOID belongs to a player in `Player.GetAllPlayers()`; any other creator is a
+     creature, so it is never "self". This keeps a Troll's or Lox's footsteps, whose feet are more
+     than 2 m from the creature's root, when it stomps right behind you.
+   - If the nearest character is a player, the sound is "self" and dropped. That covers your own,
+     and other players', hurt, swing and eat sounds. Not for loops: a loop can start while you
+     stand beside it (a fire), and it never gets a second `Play()`.
+   - Otherwise a sound is also "self" if it's parented under a `Player`, or if **any** player is
+     within 5 m, the game's interaction range (not for loops). That last rule covers the door you
+     just opened, your chopping and building, and a teammate's.
 4. Build a `SoundEvent`:
 
    | Field | Meaning |
@@ -327,13 +334,19 @@ to `MaxLines` lines.
 
 ### 2.5 Special sources
 
-- **Creature loops (`Core/LoopTracker.cs`):** every 0.25 s, walk `Character.s_characters`
-  within 60 m of the listener. For each, check a small table of prefab name → (label, looping
-  `AudioSource` path), for example `Deathsquito` → "Deathsquito buzzing". If that `AudioSource`
-  is playing and passes the audibility check, refresh the line.
+- **Creature loops (`Core/LoopTracker.cs`):** every 0.25 s, walk `Character.GetAllCharacters()`
+  within 60 m of the listener. For each that has a `creature:<prefab>` row in the label table
+  (for example `creature:Deathsquito` → "Deathsquito buzzing"), scan every playing looping
+  `AudioSource` on the character; there is no per-creature path table. If the loudest passes the
+  audibility check, refresh the line.
 - **Loops through ZSFX (fire, shield generator, stations):** `ZSFX.Play` gives the first frame
-  only. The board keeps a weak list of looping `ZSFX` it has seen, re-checked every 0.25 s: still
-  active, still `IsPlaying()`, still audible → refresh. Destroyed or silent → let it linger out.
+  only. `LoopTracker` keeps a list of up to 64 labelled looping `ZSFX` it has seen, re-checked
+  every 0.25 s: still active, still `IsPlaying()`, still audible → refresh. Destroyed or silent →
+  let it linger out. Loops of the Ambient category aren't tracked while Ambient is off; when 64
+  are tracked, the one farthest from the listener is dropped; World loops aren't refreshed while
+  settling (§2.2).
+- Loop and raid refreshes go straight to the board, not to the console's recent log, which they
+  would otherwise flood several times a second.
 - **Raids (`Core/RaidWatch.cs`):** every 0.5 s, if `RandEventSystem.instance.GetActiveEvent()`
   is non-null, keep a `Raid` line: "⚠ Raid" plus an arrow toward `m_pos`. It's only the word
   "Raid", because vanilla already shows the event's own message (`m_startMessage`) in the centre
@@ -364,8 +377,9 @@ to `MaxLines` lines.
 
   Threat lines are **bold** with the ⚠ sprite. The colours are checked for deuteranopia and
   protanopia contrast before release.
-- **Hidden** while the game's HUD is hidden (`Hud.IsUserHidden()`), in menus, and in the
-  loading screen. Not hidden in the inventory: sound still matters there.
+- **Hidden** with the game's HUD (`Hud.IsUserHidden()`: F3 and photo mode), when Earshot is off,
+  and when there is no local player (the board is cleared). It stays visible in the Esc menu and
+  the inventory: sound still matters there.
 - **Scale** follows the game's GUI scale times Earshot's `Scale`.
 
 ### 2.7 Vanilla integration (`Core/VanillaCaptions.cs`)
@@ -377,10 +391,13 @@ to `MaxLines` lines.
   by default. A postfix on `Initialize` sets the toggle, and a postfix on `OnOkAsync` writes it
   back to our config entry. `DirectionalIndicators` stays hidden. If the toggle's label
   is missing or unlocalised, Earshot sets it to its own "Closed captions (Earshot)" string (§5).
+  Vanilla's own `Settings.ClosedCaptions` and PlatformPrefs `ClosedCaptions` follow the toggle when
+  the player presses OK (vanilla OnOkAsync); nothing reads them in 1.0.16.
 - **If vanilla captions go live:** if the vanilla `ClosedCaptions` object ever has active child
   lines, meaning Iron Gate filled in `RegisterCaption`, Earshot deactivates that object and logs
   `Vanilla closed captions detected; hiding them in favour of Earshot`. This is checked cheaply
-  once per second after a caption-worthy sound.
+  once per second. A new `ClosedCaptions` instance (after logging out and back in) is checked
+  again.
 
 ### 2.8 Config (BepInEx, `com.jumpingmushroom.earshot.cfg`, all live via F1)
 
@@ -405,9 +422,12 @@ to `MaxLines` lines.
 
 ### 2.9 Console
 
-- `earshot`: the last 20 audible sounds, each with its prefab, distance, loudness, the label it
-  got and where the label came from (`table`, `creature`, `vanilla`), or why it was skipped
-  (`quiet`, `self`, `unlabelled`, `category off`, `throttled`).
+- `earshot`: first a "showing now" block: the camera yaw, listener and player position, the
+  arrow snap setting, and each line on the board with its category, distance, position, bearing,
+  arrow angle, fade and on-screen flag. Then the last 20 sounds, each with its prefab, distance,
+  loudness, the label it got and where the label came from (`table`, `creature`, `vanilla`), and
+  the outcome: `added` or `merged`, or why it was skipped (`quiet`, `self`, `muted`, `unlabelled`,
+  `category off`, `settling`, `throttled`, `outranked`).
 - `earshot unlabelled`: every distinct unlabelled audible sound this session, to paste into a
   gap report.
 - `earshot demo`: sample captions (boss, enemies ×3, wildlife, world) around you for 20 s, for
@@ -425,12 +445,13 @@ Earshot/
   docs/images/
   src/Earshot/
     Plugin.cs, PluginConfig.cs, ConfigurationManagerAttributes.cs
-    Core/Model/     SoundEvent, Audibility, LabelTable, LabelResolver, CaptionBoard,
-                    Bearing, Translations, TextCheck         (no UnityEngine, no game types)
+    Core/Model/     SoundEvent, Audibility, Category, LabelTable, LabelResolver, CaptionBoard
+                    (with CaptionLine), Bearing, LineStyle, RecentLog, Translations, TextCheck
+                                                             (no UnityEngine, no game types)
     Core/           Runtime, SoundCapture, WorldQuery, LoopTracker, RaidWatch, VanillaCaptions,
-                    EarshotConsole   (not "Game/": an Earshot.Game namespace would shadow Valheim's Game class)
+                    EarshotConsole, DemoCaptions   (not "Game/": an Earshot.Game namespace would shadow Valheim's Game class)
     Patches/        ZsfxPatch, AccessibilitySettingsPatch
-    UI/             CaptionHud, CaptionLine, Sprites
+    UI/             CaptionHud, Sprites, UiUtil
     data/labels.tsv, translations/English.txt                 (embedded resources)
   tests/Earshot.Tests/   net8.0 xUnit, compiles Core/Model by link
 ```
@@ -474,14 +495,15 @@ No AI attribution in commits, PRs, the README or release notes.
 
 ## 5. Open questions / to verify on the rig
 
-- **The Deathsquito buzz:** which `AudioSource` on the `Deathsquito` prefab plays it, and whether
-  other creatures have similar attached loops worth adding (Wraith, Wisp?). Check with a dump
-  of the prefab's children at step 4.
+- **The Deathsquito buzz:** resolved in design: no `AudioSource` path is needed, since every playing
+  looping `AudioSource` on a character with a `creature:` row is scanned (§2.5). Not yet seen in
+  play; whether other creatures (Wraith, Wisp?) have attached loops worth a row is still open.
 - **The self heuristic** (5 m for world sounds): does it catch the player's own doors, chopping
   and building without swallowing a Greydwarf hitting the wall you're standing at? Creature
-  sounds are exempt, so the risk is world sounds only.
-- **The vanilla toggle's label:** no `settings_*` caption key turned up in `resources.assets`. Check
-  what the unhidden toggle actually shows before relying on it.
+  sounds are exempt: a nearest creature, a `$enemy_` token or a creature's `m_sfxCreator` ZDOID
+  makes a sound never "self" (§2.2), so the risk is world sounds only.
+- **The vanilla toggle's label:** resolved on the rig: the unhidden toggle and its settings tooltip
+  showed Iron Gate's unlocalised keys, so Earshot replaces both with its own strings (§2.7).
 - **Raids on dedicated servers:** confirm `GetActiveEvent()` is set on a client of a dedicated
   server, via `RPC_SetEvent`, and that `m_pos` is correct there.
 - **Placement:** the bottom-centre list against ship controls and the Eitr bar. It may need to

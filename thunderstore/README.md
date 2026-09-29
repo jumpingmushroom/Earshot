@@ -81,9 +81,10 @@ Captions are on as soon as the mod is installed. **Settings → Accessibility �
 
 ## Reporting a missing caption
 
-Turn on Debug → LogUnlabelled (F1), play for a bit, then run `earshot unlabelled` in the console
-and include its output in your report:
-https://github.com/jumpingmushroom/Earshot/issues
+Play for a bit, then run `earshot unlabelled` in the console and include its output in your
+report: https://github.com/jumpingmushroom/Earshot/issues. It lists every audible sound that got no
+caption this session, whether or not Debug → LogUnlabelled is on; turning LogUnlabelled on (F1)
+additionally writes each one to the BepInEx log as it happens.
 
 ## Translating
 
