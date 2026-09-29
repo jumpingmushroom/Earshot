@@ -95,9 +95,13 @@ namespace Earshot.Core
         /// falls through to the remaining checks as if no character were nearby. A sound naming a
         /// creature (a "$enemy_" primary token) is never "self" either: ZSFX plays one frame after it
         /// is spawned, and a dying creature has usually left Character.GetAllCharacters() by then, so
-        /// the nearest character within 2 m would otherwise be the player standing over it. With no
-        /// one nearby (or a loop beside a Player), the creator, a Player parent, or any player within
-        /// 5 m (not for loops, which may have started while someone stood next to them) makes it "self".
+        /// the nearest character within 2 m would otherwise be the player standing over it. A sound with
+        /// a creator ZDOID (ZSFX.m_sfxCreator; FootStep sets it to the walker before the first Play,
+        /// decomp FootStep.cs:301-311) is "self" only when that ZDOID belongs to a player; any other
+        /// creator is a creature, so a Troll's footsteps within 5 m (its feet are over 2 m from its root)
+        /// are kept. With no creator and no one nearby (or a loop beside a Player), a Player parent or
+        /// any player within 5 m (not for loops, which may have started while someone stood next to
+        /// them) makes it "self".
         /// </summary>
         private static bool IsSelf(ZSFX z, SoundEvent e, Vector3 pos)
         {
@@ -112,12 +116,11 @@ namespace Earshot.Core
             }
             if (namesCreature)
                 return false;
+            if (z.m_sfxCreator != ZDOID.None)
+                return CreatedByPlayer(z.m_sfxCreator);
             if (nearest is Player && !e.IsLoop)
                 return true;
 
-            Player me = Player.m_localPlayer;
-            if (z.m_sfxCreator != ZDOID.None && z.m_sfxCreator == me.GetZDOID())
-                return true;
             if (z.GetComponentInParent<Player>() != null)
                 return true;
             if (!e.IsLoop && WorldQuery.AnyPlayerWithin(pos, OwnActionRadius))
@@ -129,6 +132,14 @@ namespace Earshot.Core
                 e.ObjectToken = piece.m_name;
                 e.SourceId = piece.GetInstanceID();
             }
+            return false;
+        }
+
+        private static bool CreatedByPlayer(ZDOID creator)
+        {
+            foreach (Player p in Player.GetAllPlayers())
+                if (p != null && p.GetZDOID() == creator)
+                    return true;
             return false;
         }
     }
