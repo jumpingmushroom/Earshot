@@ -29,9 +29,9 @@ namespace Earshot.Core.Model
     }
 
     /// <summary>
-    /// PLAN.md §2.3. Order: (1) Earshot's table row; (2) no row, but the sound carries a vanilla caption
-    /// token and a creature is within 2 m: the creature's name plus the vanilla action; (3) the vanilla
-    /// tokens; (4) nothing. Every string passes TextCheck.IsClean or is treated as absent.
+    /// PLAN.md §2.3. Order: (1) Earshot's table row; (2) no row, but the vanilla PRIMARY token names a
+    /// creature ($enemy_…) and a creature is within 2 m: the creature's name plus the vanilla action;
+    /// (3) the vanilla tokens; (4) nothing. Every string passes TextCheck.IsClean or is treated as absent.
     /// </summary>
     public sealed class LabelResolver
     {
@@ -64,7 +64,8 @@ namespace Earshot.Core.Model
             Category category = Categories.FromVanilla(e.VanillaType);
             bool idle = IsVanillaIdle(e);
 
-            string creature = GameText(e.CreatureToken);
+            bool primaryNamesCreature = e.PrimaryToken.StartsWith("$enemy_", StringComparison.Ordinal);
+            string creature = primaryNamesCreature ? GameText(e.CreatureToken) : null;
             if (creature != null)
                 return new Label { Source = creature, Action = action, Category = category, Idle = idle, Origin = LabelOrigin.Creature };
 

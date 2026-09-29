@@ -195,9 +195,9 @@ For each `ZSFX.Play`:
    - If it's a creature, the sound belongs to that creature and is never "self", even when
      close.
    - With no character nearby, a sound is also "self" if its creator (`m_sfxCreator`) is the
-     local player, if it's parented under a `Player`, or if **any** player is within 2.5 m.
-     That last rule covers the door you just opened, your chopping and building, and a
-     teammate's. It's a heuristic to confirm on the rig (§5).
+     local player, if it's parented under a `Player`, or if **any** player is within 5 m, the
+     game's interaction range. That last rule covers the door you just opened, your chopping
+     and building, and a teammate's. It's a heuristic to confirm on the rig (§5).
 4. Build a `SoundEvent`:
 
    | Field | Meaning |
@@ -255,9 +255,10 @@ sfx_frozenking_*          Boss      @creature   @vanilla
 
 **Resolution order** (agreed):
 1. The table entry.
-2. No entry, but the sound has a vanilla caption token and a creature within 2 m: the creature's
-   name plus the vanilla secondary token, if clean. The vanilla token is what marks a sound as
-   caption-worthy, so untagged hit and footstep sounds don't turn into bare creature names.
+2. No entry, but the vanilla PRIMARY token names a creature (`$enemy_…`) and a creature is within
+   2 m: the creature's name plus the vanilla secondary token, if clean. The primary token is what
+   marks the vanilla label as already about a creature, so a creature standing near an unrelated
+   sound (a bow draw, an attack block) doesn't have its name substituted in.
 3. No creature: the vanilla primary token, plus the secondary token if it's clean. A clean
    primary with a broken secondary shows the primary alone.
 4. Otherwise, **no caption**. With `LogUnlabelled` on, the sound is
@@ -472,7 +473,7 @@ No AI attribution in commits, PRs, the README or release notes.
 - **The Deathsquito buzz:** which `AudioSource` on the `Deathsquito` prefab plays it, and whether
   other creatures have similar attached loops worth adding (Wraith, Wisp?). Check with a dump
   of the prefab's children at step 4.
-- **The self heuristic** (2.5 m for world sounds): does it catch the player's own doors, chopping
+- **The self heuristic** (5 m for world sounds): does it catch the player's own doors, chopping
   and building without swallowing a Greydwarf hitting the wall you're standing at? Creature
   sounds are exempt, so the risk is world sounds only.
 - **The vanilla toggle's label:** no `settings_*` caption key turned up in `resources.assets`. Check

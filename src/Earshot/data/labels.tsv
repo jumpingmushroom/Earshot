@@ -26,6 +26,24 @@ sfx_greydwarf_idle                Wildlife  @creature               growling    
 sfx_seal_crawl                    -         -                       -              mute
 # The game's generic random ambience (birds, wind gusts): no identifiable source.
 RandomAmbientBase                 -         -                       -              mute
+# The game labels skeleton idles and deaths "attacking".
+sfx_skeleton_basic_verse_idle     Wildlife  @creature               rattling       idle
+sfx_skeleton_frozen_verse_idle    Wildlife  @creature               rattling       idle
+sfx_skeleton_hildir_verse_idle    Wildlife  @creature               rattling       idle
+sfx_skeleton_poison_verse_idle    Wildlife  @creature               rattling       idle
+sfx_skeleton_swamp_verse_idle     Wildlife  @creature               rattling       idle
+sfx_skeleton_basic_death          Enemy     @creature               dying
+sfx_skeleton_frozen_death         Enemy     @creature               dying
+sfx_skeleton_hildir_death         Enemy     @creature               dying
+sfx_skeleton_poison_death         Enemy     @creature               dying
+sfx_skeleton_swamp_death          Enemy     @creature               dying
+# The Bear's own caption key ($enemy_bear) has no text; its creature name is $enemy_bjorn.
+sfx_bear_idle                     Wildlife  $enemy_bjorn            groaning       idle
+sfx_bear_footstep                 Enemy     $enemy_bjorn            stomping
+sfx_bear_hurt                     -         -                       -              mute
+sfx_bear_*                        -         $enemy_bjorn            @vanilla
+# Boar attacks are typed as wildlife by the game; they are a threat.
+sfx_boar_attack                   Enemy     @creature               attacking
 
 # --- World: things that need attention ---
 sfx_smelter_produce               World     $piece_smelter          done
@@ -38,9 +56,27 @@ sfx_metaldoor_sliding_open        World     $earshot_door           opening
 sfx_ship_destroyed                World     $earshot_ship           breaking
 sfx_tree_fall_hit                 World     $earshot_tree           falling
 
+# --- Hits and blocks: the sound of your own attacks landing ---
+sfx_arrow_hit                     -         -                       -              mute
+sfx_axe_flint_hit                 -         -                       -              mute
+sfx_battleaxe_hit                 -         -                       -              mute
+sfx_club_hit                      -         -                       -              mute
+sfx_draugr_hit                    -         -                       -              mute
+sfx_draugrpile_hit                -         -                       -              mute
+sfx_fist_metal_blocked            -         -                       -              mute
+sfx_greydwarf_hit                 -         -                       -              mute
+sfx_metal_blocked                 -         -                       -              mute
+sfx_metal_shield_blocked          -         -                       -              mute
+sfx_pickaxe_hit                   -         -                       -              mute
+sfx_spear_hit                     -         -                       -              mute
+sfx_unarmed_blocked               -         -                       -              mute
+sfx_wood_blocked                  -         -                       -              mute
+
 # --- Ambient: off by default (constant background inside a base) ---
 sfx_fire_loop                     Ambient   $earshot_fire           crackling
 sfx_EternalPyre_Fire_Loop         Ambient   $earshot_fire           crackling
 sfx_morkhalla_torch_loop          Ambient   $earshot_torch          crackling
 sfx_skeleton_hildir_torch_loop    Ambient   $earshot_torch          crackling
 sfx_distant_thunder               Ambient   $earshot_thunder        -
+sfx_crow_idle                     Ambient   $sfx_crow_idle          -
+sfx_seagull_idle                  Ambient   $caption_seagull        @vanilla

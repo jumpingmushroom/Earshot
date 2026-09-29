@@ -10,6 +10,10 @@ namespace Earshot.Core
         /// <summary>Raised for every labelled looping sound, audible or not yet, so LoopTracker can re-check it.</summary>
         public static event Action<ZSFX, SoundEvent, Label> LoopSeen;
 
+        /// <summary>The game lets you interact from up to 5 m (Player.m_maxInteractDistance = 5f, decomp
+        /// Player.cs:173), so chests and doors you open at that range are still "self".</summary>
+        private const float OwnActionRadius = 5f;
+
         public static void OnPlay(ZSFX z)
         {
             if (!PluginConfig.Enabled.Value || !Runtime.Ready || Player.m_localPlayer == null)
@@ -88,7 +92,7 @@ namespace Earshot.Core
         /// is spawned, and a dying creature has usually left Character.GetAllCharacters() by then, so
         /// the nearest character within 2 m would otherwise be the player standing over it. With no
         /// one nearby (or a loop beside a Player), the creator, a Player parent, or any player within
-        /// 2.5 m (not for loops, which may have started while someone stood next to them) makes it "self".
+        /// 5 m (not for loops, which may have started while someone stood next to them) makes it "self".
         /// </summary>
         private static bool IsSelf(ZSFX z, SoundEvent e, Vector3 pos)
         {
@@ -111,7 +115,7 @@ namespace Earshot.Core
                 return true;
             if (z.GetComponentInParent<Player>() != null)
                 return true;
-            if (!e.IsLoop && WorldQuery.AnyPlayerWithin(pos, 2.5f))
+            if (!e.IsLoop && WorldQuery.AnyPlayerWithin(pos, OwnActionRadius))
                 return true;
 
             Piece piece = z.GetComponentInParent<Piece>();

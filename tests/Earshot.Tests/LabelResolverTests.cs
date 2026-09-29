@@ -137,6 +137,19 @@ sfx_bad_source       Enemy     $enemy_nosuch   stomping
     }
 
     [Fact]
+    public void CreatureNameDoesNotReplaceANonCreatureLabel()
+    {
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent
+        {
+            PrefabName = "sfx_bow_draw", PrimaryToken = "$piece_smelter", SecondaryToken = "$caption_alerted",
+            CreatureToken = "$enemy_greydwarf"
+        }, out skip);
+        Assert.Equal("Smelter", l.Source);
+        Assert.Equal(LabelOrigin.Vanilla, l.Origin);
+    }
+
+    [Fact]
     public void NoRowCreatureNameWinsOverVanillaPrimary()
     {
         SkipReason skip;
