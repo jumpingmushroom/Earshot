@@ -35,7 +35,8 @@ namespace Earshot.Core
                 Loudness = 1f
             };
             var label = new Label { Source = Runtime.Tr.Get("raid") ?? "Raid", Category = Category.Raid, Origin = LabelOrigin.Special };
-            Runtime.Offer(e, label);
+            // Straight to the board: a refresh every 0.5 s must not flood the console's recent log.
+            Runtime.Board.Offer(e, label, now);
         }
     }
 }

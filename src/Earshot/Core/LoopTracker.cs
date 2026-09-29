@@ -8,7 +8,9 @@ namespace Earshot.Core
     /// PLAN.md §2.5. ZSFX.Play fires once when a loop starts, so labelled loops are kept and re-checked
     /// every 0.25 s: still playing and audible → the line is refreshed. Creature loops (sounds on the
     /// creature itself, like a Deathsquito's buzz) never go through ZSFX, so characters with a
-    /// "creature:&lt;prefab&gt;" row are scanned for a playing looping AudioSource.
+    /// "creature:&lt;prefab&gt;" row are scanned for a playing looping AudioSource. Loops of an Ambient
+    /// category that is off are not tracked; at 64 tracked loops the farthest is dropped. Refreshes go
+    /// straight to the board, not through Runtime.Offer, so they don't flood the console's recent log.
     /// </summary>
     internal static class LoopTracker
     {
@@ -33,12 +35,34 @@ namespace Earshot.Core
 
         private static void OnLoopSeen(ZSFX z, SoundEvent e, Label label)
         {
+            if (label.Category == Category.Ambient && !PluginConfig.CategoryOn(Category.Ambient))
+                return;
             foreach (Tracked t in Loops)
                 if (t.Sfx == z)
                     return;
             if (Loops.Count >= MaxTracked)
-                Loops.RemoveAt(0);
+                Loops.RemoveAt(Farthest(WorldQuery.ListenerPosition()));
             Loops.Add(new Tracked { Sfx = z, Event = e, Label = label });
+        }
+
+        /// <summary>Index of the tracked loop farthest from the listener; a destroyed one counts as farthest.</summary>
+        private static int Farthest(Vector3 listener)
+        {
+            int index = 0;
+            float farthest = -1f;
+            for (int i = 0; i < Loops.Count; i++)
+            {
+                ZSFX sfx = Loops[i].Sfx;
+                if (sfx == null)
+                    return i;
+                float d = Vector3.Distance(listener, sfx.transform.position);
+                if (d > farthest)
+                {
+                    farthest = d;
+                    index = i;
+                }
+            }
+            return index;
         }
 
         public static void Tick(float now)
@@ -72,8 +96,11 @@ namespace Earshot.Core
                 e.Loudness = WorldQuery.Loudness(a, a.volume, e.Distance);
                 if (e.Loudness < PluginConfig.MinimumVolume.Value || !PluginConfig.CategoryOn(t.Label.Category))
                     continue;
+                if (t.Label.Category == Category.World && Runtime.Settling)
+                    continue;
                 e.OnScreen = PluginConfig.DimOnScreen.Value && WorldQuery.OnScreen(pos, 15f);
-                Runtime.Offer(e, t.Label);
+                // Straight to the board: refreshes 4x a second must not flood the console's recent log.
+                Runtime.Board.Offer(e, t.Label, Time.time);
             }
         }
 
@@ -118,7 +145,7 @@ namespace Earshot.Core
                 SkipReason skip;
                 Label label = Runtime.Resolver.Resolve(e, out skip);
                 if (label != null && PluginConfig.CategoryOn(label.Category))
-                    Runtime.Offer(e, label);
+                    Runtime.Board.Offer(e, label, Time.time);
             }
         }
     }

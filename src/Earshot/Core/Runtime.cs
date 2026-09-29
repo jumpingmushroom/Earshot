@@ -61,7 +61,8 @@ namespace Earshot.Core
             CaptionHud.Ensure();
         }
 
-        /// <summary>Waits for the game's Localization, since both the language and the creature names come from it.</summary>
+        /// <summary>Localization.instance initialises itself on first access (decomp guiutils/Localization.cs:177-187),
+        /// so this runs on the first frame and fixes the language for the session: a language change needs a restart.</summary>
         private static void TryInit()
         {
             if (Localization.instance == null)

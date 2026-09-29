@@ -1,6 +1,6 @@
+using System;
 using System.Globalization;
 using Earshot.Core.Model;
-using Earshot.UI;
 using UnityEngine;
 
 namespace Earshot.Core
@@ -14,13 +14,20 @@ namespace Earshot.Core
             new Terminal.ConsoleCommand("earshot", "Earshot: recent sounds and their captions (unlabelled: sounds with no caption; demo: sample captions for 20 s)",
                 delegate (Terminal.ConsoleEventArgs args)
                 {
-                    string sub = args.Length > 1 ? args[1].ToLowerInvariant() : "";
-                    if (sub == "unlabelled" || sub == "unlabeled")
-                        Unlabelled(args.Context);
-                    else if (sub == "demo")
-                        Demo(args.Context);
-                    else
-                        Recent(args.Context);
+                    try
+                    {
+                        string sub = args.Length > 1 ? args[1].ToLowerInvariant() : "";
+                        if (sub == "unlabelled" || sub == "unlabeled")
+                            Unlabelled(args.Context);
+                        else if (sub == "demo")
+                            Demo(args.Context);
+                        else
+                            Recent(args.Context);
+                    }
+                    catch (Exception e)
+                    {
+                        EarshotPlugin.WarnOnce("earshot console", e);
+                    }
                 });
         }
 
@@ -34,15 +41,16 @@ namespace Earshot.Core
         private static void Recent(Terminal ctx)
         {
             ShowingNow(ctx);
-            Say(ctx, "Earshot: last sounds, newest first (enabled=" + PluginConfig.Enabled.Value + ", min volume " + PluginConfig.MinimumVolume.Value.ToString("0.00") + ")");
+            Say(ctx, "Earshot: last sounds, newest first (enabled=" + PluginConfig.Enabled.Value + ", min volume " +
+                PluginConfig.MinimumVolume.Value.ToString("0.00", CultureInfo.InvariantCulture) + ")");
             foreach (RecentEntry e in Runtime.Recent.Newest(20))
-                Say(ctx, "  " + e.Time.ToString("0.0") + "s  " + e.Prefab + "  " + e.Distance.ToString("0") + "m  vol " +
-                    e.Loudness.ToString("0.00") + "  -> " + e.Outcome + (string.IsNullOrEmpty(e.Text) ? "" : "  " + e.Text));
+                Say(ctx, "  " + e.Time.ToString("0.0", CultureInfo.InvariantCulture) + "s  " + e.Prefab + "  " +
+                    e.Distance.ToString("0", CultureInfo.InvariantCulture) + "m  vol " +
+                    e.Loudness.ToString("0.00", CultureInfo.InvariantCulture) + "  -> " + e.Outcome + (string.IsNullOrEmpty(e.Text) ? "" : "  " + e.Text));
         }
 
         /// <summary>Diagnostic: the live board exactly as CaptionHud sees it (same bearing/arrow inputs), so a
-        /// wrong-direction arrow on the rig can be compared against the model's own numbers and the HUD's
-        /// actual arrow rotation.</summary>
+        /// wrong-direction arrow can be compared against the model's own numbers.</summary>
         private static void ShowingNow(Terminal ctx)
         {
             Vector3 forward = WorldQuery.CameraForward();
@@ -83,6 +91,16 @@ namespace Earshot.Core
 
         private static void Demo(Terminal ctx)
         {
+            if (!PluginConfig.Enabled.Value)
+            {
+                Say(ctx, "Earshot: captions are off (Settings > Accessibility or F1).");
+                return;
+            }
+            if (Player.m_localPlayer == null)
+            {
+                Say(ctx, "Earshot: load into a world first.");
+                return;
+            }
             DemoCaptions.Start(20f);
             Say(ctx, "Earshot: showing sample captions for 20 seconds.");
         }

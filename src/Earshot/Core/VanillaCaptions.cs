@@ -7,18 +7,19 @@ namespace Earshot.Core
     internal static class VanillaCaptions
     {
         private static float _next;
-        private static bool _hidden;
+        /// <summary>The panel already hidden; a new instance (after logging out and back in) is checked again.</summary>
+        private static ClosedCaptions _hidden;
 
         public static void Tick(float now)
         {
-            if (_hidden || now < _next || !PluginConfig.Enabled.Value)
+            if (now < _next || !PluginConfig.Enabled.Value)
                 return;
             _next = now + 1f;
             ClosedCaptions vanilla = ClosedCaptions.Instance;
-            if (vanilla == null || !vanilla.gameObject.activeSelf || vanilla.transform.childCount == 0)
+            if (vanilla == null || vanilla == _hidden || !vanilla.gameObject.activeSelf || vanilla.transform.childCount == 0)
                 return;
             vanilla.gameObject.SetActive(false);
-            _hidden = true;
+            _hidden = vanilla;
             EarshotPlugin.Log.LogInfo("Vanilla closed captions detected; hiding them in favour of Earshot.");
         }
     }
