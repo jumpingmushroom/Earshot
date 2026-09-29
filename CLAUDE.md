@@ -33,7 +33,7 @@
 ## Releasing
 
 `./build/package.sh` → `dist/Earshot-X.Y.Z.zip`. Tag `vX.Y.Z`, push, `gh release create`, then
-copy the zip to the rig's `~/Downloads` (`scp dist/Earshot-X.Y.Z.zip <rig>:Downloads/`).
+copy the zip to `~/Downloads` on the rig (set VALHEIM_SSH) (`scp dist/Earshot-X.Y.Z.zip <rig>:Downloads/`).
 The user uploads it to Thunderstore themselves.
 
 Design and the decompiled-code findings it rests on: `PLAN.md`.
