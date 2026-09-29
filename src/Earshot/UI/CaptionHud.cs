@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 using Earshot.Core;
 using Earshot.Core.Model;
 using TMPro;
@@ -17,6 +15,7 @@ namespace Earshot.UI
     /// </summary>
     internal sealed class CaptionHud : MonoBehaviour
     {
+        /// <summary>Matches MaxLines' upper bound (10).</summary>
         private const int PoolSize = 10;
         private const float LineHeight = 30f;
         private const float Pad = 10f;
@@ -34,34 +33,20 @@ namespace Earshot.UI
             public Image Arrow;
             public TextMeshProUGUI Text;
             public TextMeshProUGUI Near;
-            public string Shown;
+            // What the text was last built from, and its measured width; rebuilt only when one changes.
+            public string Source;
+            public int Count;
+            public string Action;
+            public bool Bold;
+            public float TextWidth;
+            public string NearText;
+            public float NearWidth;
         }
 
         private readonly List<Row> _rows = new List<Row>();
         private RectTransform _root;
         private Image _plate;
         private CanvasGroup _group;
-
-        /// <summary>Diagnostic for `earshot`: the arrow Image's actual on-screen rotation for each active row,
-        /// in HUD order, so it can be compared against the bearing/arrow angles computed from the model.</summary>
-        internal static string DebugArrows()
-        {
-            if (_instance == null)
-                return "no hud";
-            var sb = new StringBuilder();
-            bool first = true;
-            for (int i = 0; i < _instance._rows.Count; i++)
-            {
-                Row row = _instance._rows[i];
-                if (!row.Rect.gameObject.activeSelf)
-                    continue;
-                if (!first)
-                    sb.Append(", ");
-                first = false;
-                sb.Append(i).Append(':').Append(row.Arrow.rectTransform.localEulerAngles.z.ToString("0", CultureInfo.InvariantCulture));
-            }
-            return sb.ToString();
-        }
 
         public static void Ensure()
         {
@@ -171,13 +156,19 @@ namespace Earshot.UI
                     row.Rect.gameObject.SetActive(true);
 
                 bool threat = Categories.IsThreat(line.Category);
-                string text = Runtime.Tr.Format(LineStyle.SourceWithCount(line.Source, line.Count), line.Action);
-                if (row.Shown != text)
+                if (row.Source != line.Source || row.Count != line.Count ||
+                    row.Action != line.Action || row.Bold != threat)
                 {
+                    string text = Runtime.Tr.Format(LineStyle.SourceWithCount(line.Source, line.Count), line.Action);
                     row.Text.text = text;
-                    row.Shown = text;
+                    row.Text.fontStyle = threat ? FontStyles.Bold : FontStyles.Normal;
+                    row.TextWidth = row.Text.GetPreferredValues(text).x;
+                    row.Text.rectTransform.sizeDelta = new Vector2(row.TextWidth, LineHeight);
+                    row.Source = line.Source;
+                    row.Count = line.Count;
+                    row.Action = line.Action;
+                    row.Bold = threat;
                 }
-                row.Text.fontStyle = threat ? FontStyles.Bold : FontStyles.Normal;
 
                 Color c = PluginConfig.ColorFor(line.Category);
                 c.a = LineStyle.Opacity(line.Distance, line.MaxDistance, line.OnScreen) * line.Fade(now, board.Settings);
@@ -190,9 +181,7 @@ namespace Earshot.UI
                 float bearing = Bearing.Degrees(forward.x, forward.z, listener.x, listener.z, line.X, line.Z);
                 row.Arrow.rectTransform.localEulerAngles = new Vector3(0f, 0f, -Bearing.ArrowDegrees(bearing, PluginConfig.SnapArrows.Value));
 
-                float textWidth = row.Text.GetPreferredValues(text).x;
-                row.Text.rectTransform.sizeDelta = new Vector2(textWidth, LineHeight);
-                float width = TextX + textWidth;
+                float width = TextX + row.TextWidth;
 
                 bool near = LineStyle.ShowNear(line.Category, line.Distance, PluginConfig.NearDistance.Value, line.NearFlag);
                 if (row.Near.gameObject.activeSelf != near)
@@ -200,12 +189,15 @@ namespace Earshot.UI
                 if (near)
                 {
                     string nearText = Runtime.Tr.Get("near") ?? "near";
-                    if (row.Near.text != nearText)
+                    if (row.NearText != nearText)
+                    {
                         row.Near.text = nearText;
-                    float nearWidth = row.Near.GetPreferredValues(nearText).x;
+                        row.NearText = nearText;
+                        row.NearWidth = row.Near.GetPreferredValues(nearText).x;
+                        row.Near.rectTransform.sizeDelta = new Vector2(row.NearWidth, LineHeight);
+                    }
                     row.Near.rectTransform.anchoredPosition = new Vector2(width + 8f, 0f);
-                    row.Near.rectTransform.sizeDelta = new Vector2(nearWidth, LineHeight);
-                    width += 8f + nearWidth;
+                    width += 8f + row.NearWidth;
                 }
 
                 row.Rect.sizeDelta = new Vector2(width, LineHeight);

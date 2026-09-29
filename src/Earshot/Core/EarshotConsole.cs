@@ -71,8 +71,6 @@ namespace Earshot.Core
                     line.Fade(Time.time, Runtime.Board.Settings).ToString("0.00", CultureInfo.InvariantCulture) +
                     "  onscreen " + line.OnScreen);
             }
-
-            Say(ctx, "  hud arrows: " + CaptionHud.DebugArrows());
         }
 
         private static void Unlabelled(Terminal ctx)
