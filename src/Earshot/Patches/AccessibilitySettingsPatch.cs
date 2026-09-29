@@ -12,8 +12,9 @@ namespace Earshot.Patches
     /// PLAN.md §2.7. Iron Gate's "Closed Captions" toggle exists but is hidden (activeSelf = false).
     /// Show it and make it Earshot's master switch. Its state comes from and goes to our config, not
     /// PlatformPrefs("ClosedCaptions"), whose default of 0 would turn captions off for new players.
-    /// Its label and its UITooltip's topic/text carry Iron Gate's unlocalised keys, since the game
-    /// has no strings for them; replace those with Earshot's own text too.
+    /// Its label and its SettingsTooltip's topic/text carry Iron Gate's unlocalised keys, since the
+    /// game has no strings for them; replace those with Earshot's own text too. The settings screen
+    /// uses its own tooltip class, Valheim.SettingsGui.SettingsTooltip, not the general UITooltip.
     /// </summary>
     [HarmonyPatch(typeof(AccessibilitySettings))]
     internal static class AccessibilitySettingsPatch
@@ -33,19 +34,62 @@ namespace Earshot.Patches
                     if (!TextCheck.IsClean(label.text))
                         label.text = Runtime.Tr.Get("settings_toggle") ?? "Closed captions (Earshot)";
 
-                var tooltips = new List<UITooltip>(toggle.GetComponentsInChildren<UITooltip>(true));
-                UITooltip parentTip = toggle.GetComponentInParent<UITooltip>();
-                if (parentTip != null && !tooltips.Contains(parentTip))
-                    tooltips.Add(parentTip);
-                foreach (UITooltip tip in tooltips)
+                var candidates = new List<SettingsTooltip>();
+                var listParent = toggle.transform.parent;
+                if (listParent != null)
+                    candidates.AddRange(listParent.GetComponentsInChildren<SettingsTooltip>(true));
+                SettingsTooltip ancestorTip = toggle.GetComponentInParent<SettingsTooltip>();
+                if (ancestorTip != null && !candidates.Contains(ancestorTip))
+                    candidates.Add(ancestorTip);
+
+                var tooltips = new List<SettingsTooltip>();
+                foreach (SettingsTooltip candidate in candidates)
                 {
-                    if (tip == null)
+                    if (candidate == null || tooltips.Contains(candidate))
                         continue;
-                    if (!TextCheck.IsClean(Localization.instance.Localize(tip.m_topic)))
-                        tip.m_topic = Runtime.Tr.Get("settings_toggle") ?? "Closed captions (Earshot)";
-                    if (!TextCheck.IsClean(Localization.instance.Localize(tip.m_text)))
-                        tip.m_text = Runtime.Tr.Get("settings_toggle_descr") ?? "Show a caption for important sounds, with an arrow pointing where each one came from. More options in the mod settings (F1).";
+                    bool belongsToToggle = candidate.transform.IsChildOf(toggle.transform)
+                        || toggle.transform.IsChildOf(candidate.transform)
+                        || candidate.m_selectableOverride == toggle;
+                    if (belongsToToggle)
+                        tooltips.Add(candidate);
                 }
+
+                int fixedCount = 0;
+                foreach (SettingsTooltip tip in tooltips)
+                {
+                    bool changed = false;
+                    bool topicClean = TextCheck.IsClean(Localization.instance.Localize(tip.m_topicId ?? ""));
+                    bool textClean = TextCheck.IsClean(Localization.instance.Localize(tip.m_textId ?? ""));
+                    if (!topicClean || !textClean)
+                    {
+                        string topic = topicClean ? tip.m_topicId : (Runtime.Tr.Get("settings_toggle") ?? "Closed captions (Earshot)");
+                        string text = textClean ? tip.m_textId : (Runtime.Tr.Get("settings_toggle_descr") ?? "Show a caption for important sounds, with an arrow pointing where each one came from. More options in the mod settings (F1).");
+                        tip.SetTexts(topic, text);
+                        changed = true;
+                    }
+                    if (!string.IsNullOrEmpty(tip.m_textIdSwitch) && !TextCheck.IsClean(Localization.instance.Localize(tip.m_textIdSwitch)))
+                    {
+                        tip.m_textIdSwitch = "";
+                        changed = true;
+                    }
+                    if (!string.IsNullOrEmpty(tip.m_textIdPlayStation) && !TextCheck.IsClean(Localization.instance.Localize(tip.m_textIdPlayStation)))
+                    {
+                        tip.m_textIdPlayStation = "";
+                        changed = true;
+                    }
+                    if (!string.IsNullOrEmpty(tip.m_textIdXbox) && !TextCheck.IsClean(Localization.instance.Localize(tip.m_textIdXbox)))
+                    {
+                        tip.m_textIdXbox = "";
+                        changed = true;
+                    }
+                    if (changed)
+                        fixedCount++;
+                }
+
+                if (tooltips.Count == 0)
+                    EarshotPlugin.Log.LogInfo("Earshot: no settings tooltip found for the Closed captions toggle");
+                else
+                    EarshotPlugin.Log.LogInfo($"Earshot: fixed {fixedCount} settings tooltip(s) for the Closed captions toggle");
             }
             catch (Exception e)
             {
