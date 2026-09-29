@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using Earshot.Core;
 using Earshot.Core.Model;
 using TMPro;
@@ -39,6 +41,27 @@ namespace Earshot.UI
         private RectTransform _root;
         private Image _plate;
         private CanvasGroup _group;
+
+        /// <summary>Diagnostic for `earshot`: the arrow Image's actual on-screen rotation for each active row,
+        /// in HUD order, so it can be compared against the bearing/arrow angles computed from the model.</summary>
+        internal static string DebugArrows()
+        {
+            if (_instance == null)
+                return "no hud";
+            var sb = new StringBuilder();
+            bool first = true;
+            for (int i = 0; i < _instance._rows.Count; i++)
+            {
+                Row row = _instance._rows[i];
+                if (!row.Rect.gameObject.activeSelf)
+                    continue;
+                if (!first)
+                    sb.Append(", ");
+                first = false;
+                sb.Append(i).Append(':').Append(row.Arrow.rectTransform.localEulerAngles.z.ToString("0", CultureInfo.InvariantCulture));
+            }
+            return sb.ToString();
+        }
 
         public static void Ensure()
         {
