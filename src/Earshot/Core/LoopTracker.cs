@@ -98,7 +98,7 @@ namespace Earshot.Core
                     continue;
                 if (t.Label.Category == Category.World && Runtime.Settling)
                     continue;
-                e.OnScreen = PluginConfig.DimOnScreen.Value && WorldQuery.OnScreen(pos, 15f);
+                e.OnScreen = WorldQuery.DimOnScreen(pos);
                 // Straight to the board: refreshes 4x a second must not flood the console's recent log.
                 Runtime.Board.Offer(e, t.Label, Time.time);
             }
@@ -140,7 +140,7 @@ namespace Earshot.Core
                 {
                     PrefabName = prefab, CreatureToken = c.m_name, SourceId = c.GetInstanceID(), IsLoop = true,
                     X = pos.x, Z = pos.z, Distance = distance, MaxDistance = range, Loudness = loudest,
-                    OnScreen = PluginConfig.DimOnScreen.Value && WorldQuery.OnScreen(pos, 15f)
+                    OnScreen = WorldQuery.DimOnScreen(pos)
                 };
                 SkipReason skip;
                 Label label = Runtime.Resolver.Resolve(e, out skip);

@@ -31,7 +31,6 @@ namespace Earshot.Core.Model
         public float Distance;
         public float MaxDistance;
         public bool OnScreen;
-        public float Born;
         public float LastHeard;
         public int Count = 1;
 
@@ -91,7 +90,7 @@ namespace Earshot.Core.Model
             if (label.Idle && _lastCreated.TryGetValue(key, out last) && now - last < Settings.IdleCooldown)
                 return OfferResult.Throttled;
 
-            var line = new CaptionLine { Key = key, Category = label.Category, Source = label.Source, Born = now };
+            var line = new CaptionLine { Key = key, Category = label.Category, Source = label.Source };
             Refresh(line, e, label, now);
 
             int max = Math.Max(1, Settings.MaxLines);

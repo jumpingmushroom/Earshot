@@ -14,6 +14,14 @@ namespace Earshot.Core.Model
         public bool Idle;
         public bool Mute;
         public bool Near;
+
+        /// <summary>The row describes a creature's sound: typed Boss or Enemy, or its source is a creature
+        /// ($enemy_ token or @creature). Such a sound is never the player's own, even when the game's own
+        /// caption token doesn't name a creature (Moose, Seal and Krigen carry "$sfx_" tokens).</summary>
+        public bool NamesCreature =>
+            !Mute && ((HasCategory && (Category == Category.Boss || Category == Category.Enemy)) ||
+                      Source == "@creature" ||
+                      (Source != null && Source.StartsWith("$enemy_", StringComparison.Ordinal)));
     }
 
     /// <summary>

@@ -72,8 +72,17 @@ namespace Earshot.Core
             return false;
         }
 
+        /// <summary>Sources this close and visible are dimmed and ranked lowest (DimOnScreen).</summary>
+        private const float DimRange = 15f;
+
+        /// <summary>DimOnScreen is on and the source is close and on screen.</summary>
+        public static bool DimOnScreen(Vector3 pos)
+        {
+            return PluginConfig.DimOnScreen.Value && OnScreen(pos, DimRange);
+        }
+
         /// <summary>In front of the camera, inside the viewport, and no further than `within` metres along the view.</summary>
-        public static bool OnScreen(Vector3 pos, float within)
+        private static bool OnScreen(Vector3 pos, float within)
         {
             Camera cam = Utils.GetMainCamera();
             if (cam == null)

@@ -108,4 +108,27 @@ creature:Deathsquito   Enemy     @creature        buzzing      near    # trailin
         Assert.Equal("$x", t.Find("sfx_d").Source); // duplicate: first wins
         Assert.Equal(4, warnings.Count);
     }
+
+    [Fact]
+    public void RowsThatNameACreature()
+    {
+        LabelTable t = Parse(@"
+sfx_troll_footstep     Enemy     $enemy_troll     stomping
+sfx_fader_bell         Boss      $enemy_fader     ringing
+sfx_greydwarf_idle     Wildlife  @creature        growling   idle
+sfx_moose_*            -         $enemy_moose     @vanilla
+sfx_smelter_produce    World     $piece_smelter   done
+sfx_fire_loop          Ambient   $earshot_fire    crackling
+sfx_mill_*             -         $piece_windmill  done
+sfx_seal_crawl         Enemy     -                -          mute
+");
+        Assert.True(t.Find("sfx_troll_footstep").NamesCreature);
+        Assert.True(t.Find("sfx_fader_bell").NamesCreature);
+        Assert.True(t.Find("sfx_greydwarf_idle").NamesCreature);
+        Assert.True(t.Find("sfx_moose_attack_melee").NamesCreature);
+        Assert.False(t.Find("sfx_smelter_produce").NamesCreature);
+        Assert.False(t.Find("sfx_fire_loop").NamesCreature);
+        Assert.False(t.Find("sfx_mill_produce").NamesCreature);
+        Assert.False(t.Find("sfx_seal_crawl").NamesCreature);
+    }
 }

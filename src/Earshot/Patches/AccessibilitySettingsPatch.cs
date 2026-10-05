@@ -19,6 +19,11 @@ namespace Earshot.Patches
     [HarmonyPatch(typeof(AccessibilitySettings))]
     internal static class AccessibilitySettingsPatch
     {
+        private static string ToggleLabel()
+        {
+            return Runtime.Tr.Get("settings_toggle") ?? "Closed captions (Earshot)";
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(nameof(AccessibilitySettings.Initialize))]
         private static void AfterInitialize(AccessibilitySettings __instance)
@@ -32,7 +37,7 @@ namespace Earshot.Patches
                 toggle.isOn = PluginConfig.Enabled.Value;
                 foreach (TMP_Text label in toggle.GetComponentsInChildren<TMP_Text>(true))
                     if (!TextCheck.IsClean(label.text))
-                        label.text = Runtime.Tr.Get("settings_toggle") ?? "Closed captions (Earshot)";
+                        label.text = ToggleLabel();
 
                 var candidates = new List<SettingsTooltip>();
                 var listParent = toggle.transform.parent;
@@ -62,7 +67,7 @@ namespace Earshot.Patches
                     bool textClean = TextCheck.IsClean(Localization.instance.Localize(tip.m_textId ?? ""));
                     if (!topicClean || !textClean)
                     {
-                        string topic = topicClean ? tip.m_topicId : (Runtime.Tr.Get("settings_toggle") ?? "Closed captions (Earshot)");
+                        string topic = topicClean ? tip.m_topicId : ToggleLabel();
                         string text = textClean ? tip.m_textId : (Runtime.Tr.Get("settings_toggle_descr") ?? "Show a caption for important sounds, with an arrow pointing where each one came from. More options in the mod settings (F1).");
                         tip.SetTexts(topic, text);
                         changed = true;

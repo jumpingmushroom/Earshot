@@ -82,7 +82,7 @@ namespace Earshot.Core
                 Runtime.Record(e, "category off", label);
                 return;
             }
-            e.OnScreen = PluginConfig.DimOnScreen.Value && WorldQuery.OnScreen(pos, 15f);
+            e.OnScreen = WorldQuery.DimOnScreen(pos);
             Runtime.Offer(e, label);
         }
 
@@ -96,7 +96,7 @@ namespace Earshot.Core
         /// creature (a "$enemy_" primary token) is never "self" either: ZSFX plays one frame after it
         /// is spawned, and a dying creature has usually left Character.GetAllCharacters() by then, so
         /// the nearest character within 2 m would otherwise be the player standing over it. So is a sound
-        /// whose label-table row is Boss or Enemy. A sound with
+        /// whose label-table row names a creature. A sound with
         /// a creator ZDOID (ZSFX.m_sfxCreator; FootStep sets it to the walker before the first Play,
         /// decomp FootStep.cs:301-311) is "self" only when that ZDOID belongs to a player; any other
         /// creator is a creature, so a Troll's footsteps within 5 m (its feet are over 2 m from its root)
@@ -106,7 +106,7 @@ namespace Earshot.Core
         /// </summary>
         private static bool IsSelf(ZSFX z, SoundEvent e, Vector3 pos)
         {
-            bool namesCreature = e.PrimaryToken.StartsWith("$enemy_", StringComparison.Ordinal) || ThreatRow(e.PrefabName);
+            bool namesCreature = e.PrimaryToken.StartsWith("$enemy_", StringComparison.Ordinal) || CreatureRow(e.PrefabName);
 
             Character nearest = WorldQuery.NearestCharacter(pos, 2f);
             if (nearest != null && !(nearest is Player))
@@ -136,12 +136,12 @@ namespace Earshot.Core
             return false;
         }
 
-        /// <summary>Earshot's table types the sound as Boss or Enemy: a creature's, even when the game left it
-        /// uncaptioned (attack wind-ups such as sfx_fader_claw_pre).</summary>
-        private static bool ThreatRow(string prefab)
+        /// <summary>Earshot's table says the sound is a creature's (LabelRow.NamesCreature), even when the game
+        /// left it uncaptioned (sfx_fader_claw_pre) or its token isn't "$enemy_" (sfx_jotunwarrior_impact_flesh).</summary>
+        private static bool CreatureRow(string prefab)
         {
             LabelRow row = Runtime.Resolver.Table.Find(prefab);
-            return row != null && row.HasCategory && (row.Category == Category.Boss || row.Category == Category.Enemy);
+            return row != null && row.NamesCreature;
         }
 
         private static bool CreatedByPlayer(ZDOID creator)

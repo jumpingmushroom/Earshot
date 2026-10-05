@@ -17,7 +17,8 @@
 - New: Vile, Writhan and Kvastur sounds, Wraith moaning, Fader's firewall and idle, big skeletons,
   the lava Leviathan sinking, the windmill finishing, and the Deep North creatures (Kall
   Fimbulbringer, Gammeltroll, Krigen, Hexen, Moose, Seal, Fallen Warrior, Elaking).
-- A sound that Earshot's table marks as a boss or enemy is never mistaken for your own.
+- A sound that Earshot's table gives to a creature (a boss or enemy row, or a creature as its
+  source) is never mistaken for your own.
 
 ## 0.1.0 — first cut
 
