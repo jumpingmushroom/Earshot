@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.1 — more creatures, fewer gaps
+
+- The Stone Golem's second attack no longer shows a file path; the game's caption for it is an
+  asset path. Any game caption that isn't a translation key is now ignored.
+- Golem attacks are threats (bold, ⚠), its footsteps are captioned, and its sighing is throttled
+  idle chatter.
+- Boss and creature lines that lost their action word now have one: Moder roaring, breathing ice
+  and flapping its wings; The Elder, Eikthyr, Yagluth, Fader and The Queen roaring; The Elder
+  shooting; and more. The game ships these words without English text, so Earshot supplies it.
+- Warnings before the hit: Charred Marksman aiming, Fader's bite and claw wind-ups and fire-breath
+  inhale, Fenring jumping, Dvergr and Drake charging, The Elder charging, Bonemass's ground attack,
+  Abomination attacks and awakening, Yagluth's meteors, nova and beam, Gjall roaring, The Queen's
+  pierce.
+- Fallen Valkyrie, Seeker and Abomination attacks and Charred deaths count as threats.
+- New: Vile, Writhan and Kvastur sounds, Wraith moaning, Fader's firewall and idle, big skeletons,
+  the lava Leviathan sinking, the windmill finishing, and the Deep North creatures (Kall
+  Fimbulbringer, Gammeltroll, Krigen, Hexen, Moose, Seal, Fallen Warrior, Elaking).
+- A sound that Earshot's table marks as a boss or enemy is never mistaken for your own.
+
 ## 0.1.0 — first cut
 
 - Closed captions at the bottom of the screen for the sounds worth reacting to: bosses, enemies,

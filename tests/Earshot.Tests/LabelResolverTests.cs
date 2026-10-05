@@ -4,7 +4,8 @@ using Xunit;
 
 public class LabelResolverTests
 {
-    // Mimics Localization.instance.Localize: known tokens translate, unknown ones render as "[key]".
+    // Mimics Localization.instance.Localize: known tokens translate, unknown ones render as "[key]",
+    // text that isn't a token passes through unchanged.
     private static readonly Dictionary<string, string> Game = new Dictionary<string, string>
     {
         ["$enemy_troll"] = "Troll",
@@ -19,6 +20,7 @@ public class LabelResolverTests
     private static string Localize(string token)
     {
         if (string.IsNullOrEmpty(token)) return "";
+        if (!token.StartsWith("$")) return token;
         string v;
         return Game.TryGetValue(token, out v) ? v : "[" + token.TrimStart('$') + "]";
     }
@@ -32,9 +34,10 @@ sfx_fire_loop        Ambient   $earshot_fire   crackling
 sfx_eikthyr_*        -         @creature       @vanilla
 sfx_bad_action       Enemy     $enemy_troll    nosuchkey
 sfx_bad_source       Enemy     $enemy_nosuch   stomping
+sfx_creature_row     Enemy     @creature       @vanilla
 ";
 
-    private const string English = "stomping = stomping\ngrowling = growling\ndone = done\ncrackling = crackling\nearshot_fire = Fire\n";
+    private const string English = "stomping = stomping\ngrowling = growling\ndone = done\ncrackling = crackling\nearshot_fire = Fire\ncaption_roaring = roaring\n";
 
     private static readonly LabelResolver Resolver =
         new LabelResolver(LabelTable.Parse(Table, null), Translations.Parse(English), Localize);
@@ -188,7 +191,7 @@ sfx_bad_source       Enemy     $enemy_nosuch   stomping
     public void BrokenSecondaryIsDropped()
     {
         SkipReason skip;
-        Label l = Resolve(new SoundEvent { PrefabName = "sfx_x", PrimaryToken = "$enemy_troll", SecondaryToken = "$caption_roaring" }, out skip);
+        Label l = Resolve(new SoundEvent { PrefabName = "sfx_x", PrimaryToken = "$enemy_troll", SecondaryToken = "$sfx_nosuch" }, out skip);
         Assert.Equal("Troll", l.Source);
         Assert.Null(l.Action);
     }
@@ -239,5 +242,55 @@ sfx_bad_source       Enemy     $enemy_nosuch   stomping
         }, out skip);
         Assert.False(l.Idle);
         Assert.Equal(LabelOrigin.Creature, l.Origin);
+    }
+
+    [Fact]
+    public void VanillaTextThatIsNotATokenIsUnlabelled()
+    {
+        // sfx_stonegolem_second_start: Iron Gate left an asset path in the caption field.
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent
+        {
+            PrefabName = "sfx_stonegolem_second_start", PrimaryToken = "Assets/Characters/StoneGolem/fx/sfx_stonegolem_primary_start.prefab",
+            SecondaryToken = "$caption_alerted", VanillaType = VanillaType.Enemy
+        }, out skip);
+        Assert.Null(l);
+        Assert.Equal(SkipReason.Unlabelled, skip);
+    }
+
+    [Fact]
+    public void CreatureRowDoesNotFallBackToANonToken()
+    {
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent { PrefabName = "sfx_creature_row", PrimaryToken = "Assets/x.prefab" }, out skip);
+        Assert.Null(l);
+        Assert.Equal(SkipReason.Unlabelled, skip);
+    }
+
+    [Fact]
+    public void VanillaActionTheGameHasNoTextForComesFromTranslations()
+    {
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent
+        {
+            PrefabName = "sfx_eikthyr_spawn", PrimaryToken = "$enemy_eikthyr", SecondaryToken = "$caption_roaring", VanillaType = VanillaType.Boss
+        }, out skip);
+        Assert.Equal("roaring", l.Action);
+
+        l = Resolve(new SoundEvent
+        {
+            PrefabName = "sfx_dragon_scream", PrimaryToken = "$enemy_eikthyr", SecondaryToken = "$caption_roaring", VanillaType = VanillaType.Boss
+        }, out skip);
+        Assert.Equal("Eikthyr", l.Source);
+        Assert.Equal("roaring", l.Action);
+    }
+
+    [Fact]
+    public void UnknownVanillaActionWithoutAnEarshotWordIsDropped()
+    {
+        SkipReason skip;
+        Label l = Resolve(new SoundEvent { PrefabName = "sfx_x", PrimaryToken = "$enemy_troll", SecondaryToken = "$caption_nosuch" }, out skip);
+        Assert.Equal("Troll", l.Source);
+        Assert.Null(l.Action);
     }
 }

@@ -55,12 +55,12 @@ namespace Earshot.Core.Model
             if (row != null)
                 return FromRow(row, e, out skip);
 
-            if (string.IsNullOrEmpty(e.PrimaryToken))
+            if (!IsToken(e.PrimaryToken))
             {
                 skip = SkipReason.Unlabelled;
                 return null;
             }
-            string action = GameText(e.SecondaryToken);
+            string action = VanillaAction(e.SecondaryToken);
             Category category = Categories.FromVanilla(e.VanillaType);
             bool idle = IsVanillaIdle(e);
 
@@ -114,10 +114,11 @@ namespace Earshot.Core.Model
 
         private string SourceText(string spec, SoundEvent e)
         {
+            string primary = IsToken(e.PrimaryToken) ? e.PrimaryToken : null;
             if (spec == "@creature")
-                return GameText(e.CreatureToken) ?? GameText(e.PrimaryToken);
+                return GameText(e.CreatureToken) ?? GameText(primary);
             if (spec == "@object")
-                return GameText(e.ObjectToken) ?? GameText(e.PrimaryToken);
+                return GameText(e.ObjectToken) ?? GameText(primary);
             return Word(spec);
         }
 
@@ -126,8 +127,28 @@ namespace Earshot.Core.Model
             if (spec == null)
                 return null;
             if (spec == "@vanilla")
-                return GameText(e.SecondaryToken);
+                return VanillaAction(e.SecondaryToken);
             return Word(spec);
+        }
+
+        /// <summary>A vanilla caption field holds a "$token". Iron Gate left an asset path in one
+        /// (sfx_stonegolem_second_start); the game's Localize passes any non-token text through unchanged.</summary>
+        private static bool IsToken(string token)
+        {
+            return !string.IsNullOrEmpty(token) && token.StartsWith("$", StringComparison.Ordinal);
+        }
+
+        /// <summary>The game's action word, or Earshot's own text for a "$caption_" key the game ships without
+        /// (caption_roaring, caption_shooting, ...: translations/English.txt).</summary>
+        private string VanillaAction(string token)
+        {
+            if (!IsToken(token))
+                return null;
+            string text = GameText(token);
+            if (text != null || !token.StartsWith("$caption_", StringComparison.Ordinal))
+                return text;
+            text = _tr.Get(token.Substring(1));
+            return TextCheck.IsClean(text) ? text : null;
         }
 
         /// <summary>"$earshot_x" and bare words are Earshot's own strings; any other "$token" is the game's.</summary>

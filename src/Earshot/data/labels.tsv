@@ -19,6 +19,34 @@ sfx_deathsquito_attack            Enemy     $enemy_deathsquito      attacking
 creature:Deathsquito              Enemy     @creature               buzzing        near
 sfx_fader_bell                    Boss      $enemy_fader            ringing
 
+# --- Attack wind-ups the game leaves uncaptioned: the warning before the hit ---
+sfx_stonegolem_spikeattack_trailon Enemy    $enemy_stonegolem       attacking
+sfx_stonegolem_footstep           Enemy     $enemy_stonegolem       stomping
+sfx_charred_archer_bow_draw       Enemy     $enemy_charred_archer   aiming
+sfx_charred_archer_volley_draw    Enemy     $enemy_charred_archer   aiming
+sfx_fader_bite_pre                Boss      $enemy_fader            attacking
+sfx_fader_claw_pre                Boss      $enemy_fader            attacking
+sfx_fenring_jump_start            Enemy     @creature               jumping
+sfx_dverger_ball_start            Enemy     $enemy_dvergrs          charging
+sfx_dverger_fireball_rain_start   Enemy     $enemy_dvergrs          charging
+sfx_hatchling_coldball_start      Enemy     $enemy_drake            charging
+sfx_gdking_shoot_start            Boss      $enemy_gdking           charging
+sfx_Bonemass_throw_trigger        Boss      $enemy_bonemass         throwing
+fx_Bonemass_aoe_start             Boss      $enemy_bonemass         attacking
+sfx_Abomination_attack            Enemy     $enemy_abomination      attacking
+fx_Abomination_attack*            Enemy     $enemy_abomination      attacking
+sfx_abomination_arise_end         Enemy     $enemy_abomination      awakening
+fx_goblinking_vo_wakeup           Boss      $enemy_goblinking       awakening
+fx_goblinking_vo_beamstart        Boss      $enemy_goblinking       charging
+fx_goblinking_vo_meteors*         Boss      $enemy_goblinking       meteors
+fx_goblinking_vo_nova             Boss      $enemy_goblinking       attacking
+fx_gjall_taunt                    Enemy     $enemy_gjall            roaring
+sfx_HiveQueen_pierce              Boss      $enemy_seekerqueen      attacking
+sfx_skeleton_big_alerted          Enemy     @creature               alerted
+sfx_skeleton_big_death            Enemy     @creature               dying
+sfx_leviathanlava_sink            World     $earshot_leviathan      sinking        near
+sfx_leviathanlava_taunt           World     $earshot_leviathan      rumbling
+
 # --- Fixes for mislabelled game sounds ---
 # The game labels the plain Greydwarf idle "Greydwarf Brute growling".
 sfx_greydwarf_idle                Wildlife  @creature               growling       idle
@@ -44,6 +72,58 @@ sfx_bear_hurt                     -         -                       -           
 sfx_bear_*                        -         $enemy_bjorn            @vanilla
 # Boar attacks are typed as wildlife by the game; they are a threat.
 sfx_boar_attack                   Enemy     @creature               attacking
+# The Stone Golem's second attack carries an asset path as its caption, and its main attack and idle
+# are typed Misc.
+sfx_stonegolem_primary_start      Enemy     $enemy_stonegolem       attacking
+sfx_stonegolem_second_start       Enemy     $enemy_stonegolem       attacking
+sfx_stonegolem_idle               Wildlife  $enemy_stonegolem       sighing        idle
+# Threats the game types as Misc.
+sfx_fallenvalkyrie_attack_claw    Enemy     $enemy_fallenvalkyrie   attacking
+sfx_fallenvalkyrie_attack_spin_charge Enemy $enemy_fallenvalkyrie   charging
+sfx_seeker_attack_claws_flying    Enemy     $enemy_seeker           attacking
+sfx_charred_death                 Enemy     @creature               dying
+sfx_Abomination_move              Enemy     $enemy_abomination      moving
+sfx_BogwitchKvastur_idle          Wildlife  $enemy_kvastur          @vanilla       idle
+# Captions naming a creature key with no text: Fader's fire-breath wind-up says $enemy_father.
+sfx_fader_firebreath_in           Boss      $enemy_fader            @vanilla
+sfx_fader_firewall_start          Boss      $enemy_fader            summoning
+sfx_fader_idle                    Boss      $enemy_fader            growling       idle
+sfx_kvastur_death                 Enemy     $enemy_kvastur          dying
+sfx_tentaroot_attack              -         @creature               attacking
+sfx_wraith_idle                   Wildlife  $enemy_wraith           moaning        idle
+# Vile and Writhan sounds are captioned as the Bear ($enemy_bear, no text).
+sfx_unbjorn_footstep              Enemy     $enemy_unbjorn          stomping
+sfx_unbjorn_hurt                  -         -                       -              mute
+sfx_unbjorn_idle                  Wildlife  $enemy_unbjorn          groaning       idle
+sfx_unbjorn_*                     -         $enemy_unbjorn          @vanilla
+sfx_writhan_idle                  Wildlife  $enemy_writhan          growling       idle
+sfx_writhan_step                  -         -                       -              mute
+sfx_writhan_*                     -         $enemy_writhan          @vanilla
+# Deep North: the game's captions use keys with no text ($sfx_frozenking, $sfx_moose, ...).
+sfx_frozenking_idle_*             Boss      $enemy_frozenking       -              idle
+sfx_frozenking_*                  Boss      $enemy_frozenking       @vanilla
+sfx_deepnorth_gate_activate       World     $earshot_gate           activating
+sfx_deepnorth_gate_open_loop      World     $earshot_gate           opening
+sfx_deepnorth_gate_close_loop     World     $earshot_gate           closing
+sfx_gameltroll_footstep           Enemy     $enemy_trollfrost       stomping
+sfx_gameltroll_idle               Wildlife  $enemy_trollfrost       groaning       idle
+sfx_gameltroll_*                  -         $enemy_trollfrost       @vanilla
+sfx_jotunwarrior_idle             Wildlife  $enemy_jotun_warrior    groaning       idle
+sfx_jotunwarrior_*                -         $enemy_jotun_warrior    @vanilla
+sfx_jotunwitch_idle               Wildlife  $enemy_jotun_witch      groaning       idle
+sfx_jotunwitch_*                  -         $enemy_jotun_witch      @vanilla
+sfx_moose_idle                    Wildlife  $enemy_moose            calling        idle
+sfx_moose_calf_verse              Wildlife  $enemy_moosecalf        calling        idle
+sfx_moose_*                       -         $enemy_moose            @vanilla
+sfx_seal_idle                     Wildlife  $enemy_seal             calling        idle
+sfx_babyseal_idle                 Wildlife  $enemy_seal_baby        calling        idle
+sfx_seal_*                        -         $enemy_seal             @vanilla
+sfx_elaking_spawner_idle_loop     -         -                       -              mute
+sfx_elaking_idle*                 Wildlife  $enemy_elaking          @vanilla       idle
+sfx_elaking_*                     -         $enemy_elaking          @vanilla
+sfx_fallenwarrior_idle            Wildlife  $enemy_fallenwarrior    calling        idle
+sfx_fallenwarrior_hurt            -         $enemy_fallenwarrior    hurt
+sfx_fallenwarrior_*               -         $enemy_fallenwarrior    @vanilla
 
 # --- World: things that need attention ---
 sfx_smelter_produce               World     $piece_smelter          done
@@ -55,6 +135,7 @@ sfx_stonedoor_sliding_open        World     $earshot_door           opening
 sfx_metaldoor_sliding_open        World     $earshot_door           opening
 sfx_ship_destroyed                World     $earshot_ship           breaking
 sfx_tree_fall_hit                 World     $earshot_tree           falling
+sfx_mill_produce                  World     $piece_windmill         done
 
 # --- Hits and blocks: the sound of your own attacks landing ---
 sfx_arrow_hit                     -         -                       -              mute
