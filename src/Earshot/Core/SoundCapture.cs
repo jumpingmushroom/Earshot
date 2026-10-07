@@ -88,7 +88,8 @@ namespace Earshot.Core
 
         /// <summary>
         /// Fills CreatureToken/ObjectToken/SourceId and decides whether this is a player's own sound.
-        /// Nearest character within 2 m: a player means "self", a creature owns the sound. For a loop,
+        /// A creature that created the sound (below) owns it; otherwise the nearest character within
+        /// 2 m: a player means "self", a creature owns the sound. For a loop,
         /// a nearby Player does NOT mean "self" — a loop can start while the player stands beside it
         /// (a fire, a shield generator), and dropping it here would lose it for good since it never
         /// gets a second chance via ZSFX.Play. So for loops that check is skipped and a nearby Player
@@ -100,7 +101,9 @@ namespace Earshot.Core
         /// a creator ZDOID (ZSFX.m_sfxCreator; FootStep sets it to the walker before the first Play,
         /// decomp FootStep.cs:301-311) is "self" only when that ZDOID belongs to a player; any other
         /// creator is a creature, so a Troll's footsteps within 5 m (its feet are over 2 m from its root)
-        /// are kept. With no creator and no one nearby (or a loop beside a Player), a Player parent or
+        /// are kept, and that creature names the sound for @creature rows: the Bear runs on the Lox's
+        /// sfx_lox_footstep_run, and either may stand beside the other. With no creator and
+        /// no one nearby (or a loop beside a Player), a Player parent or
         /// any player within 5 m (not for loops, which may have started while someone stood next to
         /// them) makes it "self".
         /// </summary>
@@ -109,16 +112,20 @@ namespace Earshot.Core
             bool namesCreature = e.PrimaryToken.StartsWith("$enemy_", StringComparison.Ordinal) || CreatureRow(e.PrefabName);
 
             Character nearest = WorldQuery.NearestCharacter(pos, 2f);
-            if (nearest != null && !(nearest is Player))
+            bool creatureCreator = z.m_sfxCreator != ZDOID.None && !CreatedByPlayer(z.m_sfxCreator);
+            Character owner = creatureCreator ? CreatorCharacter(z.m_sfxCreator) : null;
+            if (owner == null && nearest != null && !(nearest is Player))
+                owner = nearest;
+            if (owner != null)
             {
-                e.CreatureToken = nearest.m_name;
-                e.SourceId = nearest.GetInstanceID();
+                e.CreatureToken = owner.m_name;
+                e.SourceId = owner.GetInstanceID();
                 return false;
             }
-            if (namesCreature)
+            if (creatureCreator || namesCreature)
                 return false;
             if (z.m_sfxCreator != ZDOID.None)
-                return CreatedByPlayer(z.m_sfxCreator);
+                return true;
             if (nearest is Player && !e.IsLoop)
                 return true;
 
@@ -142,6 +149,13 @@ namespace Earshot.Core
         {
             LabelRow row = Runtime.Resolver.Table.Find(prefab);
             return row != null && row.NamesCreature;
+        }
+
+        /// <summary>The creature a ZSFX creator ZDOID belongs to, or null when it isn't loaded here.</summary>
+        private static Character CreatorCharacter(ZDOID creator)
+        {
+            GameObject go = ZNetScene.instance != null ? ZNetScene.instance.FindInstance(creator) : null;
+            return go != null ? go.GetComponent<Character>() : null;
         }
 
         private static bool CreatedByPlayer(ZDOID creator)

@@ -13,7 +13,8 @@
 # --- Enemies: sounds the game leaves uncaptioned ---
 sfx_troll_footstep                Enemy     $enemy_troll            stomping
 sfx_troll_footstep_water          Enemy     $enemy_troll            splashing
-sfx_lox_footstep_run              Enemy     $enemy_lox              charging
+# The Bear runs on the Lox's footsteps (it never plays sfx_bear_footstep), so name the walker.
+sfx_lox_footstep_run              Enemy     @creature               charging
 sfx_serpent_attack_trigger        Enemy     $enemy_serpent          attacking
 sfx_deathsquito_attack            Enemy     $enemy_deathsquito      attacking
 creature:Deathsquito              Enemy     @creature               buzzing        near
@@ -67,7 +68,6 @@ sfx_skeleton_poison_death         Enemy     @creature               dying
 sfx_skeleton_swamp_death          Enemy     @creature               dying
 # The Bear's own caption key ($enemy_bear) has no text; its creature name is $enemy_bjorn.
 sfx_bear_idle                     Wildlife  $enemy_bjorn            groaning       idle
-sfx_bear_footstep                 Enemy     $enemy_bjorn            stomping
 sfx_bear_hurt                     -         -                       -              mute
 sfx_bear_*                        -         $enemy_bjorn            @vanilla
 # Boar attacks are typed as wildlife by the game; they are a threat.

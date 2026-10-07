@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- A charging Bear is no longer captioned as a Lox. The Bear runs on the Lox's footstep sound;
+  the caption now names whichever creature made the step.
+
 ## 0.1.1 — more creatures, fewer gaps
 
 - The Stone Golem's second attack no longer shows a file path; the game's caption for it is an
