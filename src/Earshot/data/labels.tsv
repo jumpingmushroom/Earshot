@@ -134,7 +134,10 @@ sfx_flametalgate_door_close       World     $earshot_gate           closing
 sfx_stonedoor_sliding_open        World     $earshot_door           opening
 sfx_metaldoor_sliding_open        World     $earshot_door           opening
 sfx_ship_destroyed                World     $earshot_ship           breaking
-sfx_tree_fall_hit                 World     $earshot_tree           falling
+# sfx_tree_fall is the tree coming down. sfx_tree_fall_hit is a log's impact sound: it plays every time a
+# log knocks into something (each axe hit, rolling, settling when an area loads), not when a tree falls.
+sfx_tree_fall                     World     $earshot_tree           falling
+sfx_tree_fall_hit                 -         -                       -              mute
 sfx_mill_produce                  World     $piece_windmill         done
 
 # --- Hits and blocks: the sound of your own attacks landing ---

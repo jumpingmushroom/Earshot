@@ -4,6 +4,8 @@
 
 - A charging Bear is no longer captioned as a Lox. The Bear runs on the Lox's footstep sound;
   the caption now names whichever creature made the step.
+- "Tree falling" now shows when a tree falls, not whenever a log bumps into something (each
+  axe hit on a log, logs rolling or settling out of sight).
 
 ## 0.1.1 — more creatures, fewer gaps
 
