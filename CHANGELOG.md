@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.2 — bear footsteps, tree falling
 
 - A charging Bear is no longer captioned as a Lox. The Bear runs on the Lox's footstep sound;
   the caption now names whichever creature made the step.

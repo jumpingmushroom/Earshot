@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Earshot</AssemblyName>
     <RootNamespace>Earshot</RootNamespace>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Description>Closed captions for Valheim's important sounds, with a live direction arrow.</Description>
   </PropertyGroup>
 

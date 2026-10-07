@@ -18,7 +18,7 @@ namespace Earshot
     {
         public const string PluginGuid = "com.jumpingmushroom.earshot";
         public const string PluginName = "Earshot";
-        public const string PluginVersion = "0.1.1";
+        public const string PluginVersion = "0.1.2";
 
         internal static ManualLogSource Log;
 
