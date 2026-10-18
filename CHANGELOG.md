@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — chick chirps, Eikthyr's stomp
+
+- A chick's chirp is no longer captioned "Chicken taking damage". The game plays the chick's hurt
+  sound as its idle; Earshot now captions it "Chicken chirping".
+- Eikthyr's stomp is no longer captioned as a Lox: it reuses the Lox's stomp sound. A creature's
+  attack sounds now name that creature.
+
 ## 0.1.2 — bear footsteps, tree falling
 
 - A charging Bear is no longer captioned as a Lox. The Bear runs on the Lox's footstep sound;
