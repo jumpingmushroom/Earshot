@@ -114,6 +114,9 @@ namespace Earshot.Core
             Character nearest = WorldQuery.NearestCharacter(pos, 2f);
             bool creatureCreator = z.m_sfxCreator != ZDOID.None && !CreatedByPlayer(z.m_sfxCreator);
             Character owner = creatureCreator ? CreatorCharacter(z.m_sfxCreator) : null;
+            // Attack sounds have no creator but are parented under the attacker (Attack.cs:541).
+            if (owner == null && z.GetComponentInParent<Character>() is Character parent && !(parent is Player))
+                owner = parent;
             if (owner == null && nearest != null && !(nearest is Player))
                 owner = nearest;
             if (owner != null)
