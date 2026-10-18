@@ -55,6 +55,8 @@ sfx_greydwarf_idle                Wildlife  @creature               growling    
 sfx_seal_crawl                    -         -                       -              mute
 # The game's generic random ambience (birds, wind gusts): no identifiable source.
 RandomAmbientBase                 -         -                       -              mute
+# The chick (Chicken) plays its hurt sound as its idle, so the game captions every chirp "taking damage".
+sfx_chick_hurt                    Wildlife  $enemy_chicken          chirping       idle
 # The game labels skeleton idles and deaths "attacking".
 sfx_skeleton_basic_verse_idle     Wildlife  @creature               rattling       idle
 sfx_skeleton_frozen_verse_idle    Wildlife  @creature               rattling       idle

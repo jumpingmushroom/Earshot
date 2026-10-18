@@ -30,6 +30,7 @@ breaking = breaking apart
 buzzing = buzzing
 calling = calling
 charging = charging
+chirping = chirping
 closing = closing
 crackling = crackling
 done = done
